@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { read, publishedArticles } from '../../../lib/store';
+import { readSite, getArticle, publishedArticles } from '../../../lib/store';
 import { Masthead, SiteFooter } from '../../Chrome';
 
 export const dynamic = 'force-dynamic';
@@ -8,16 +8,15 @@ const img = s => (s?.startsWith('/') || s?.startsWith('data:') ? s : `/${s}`);
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
-  const a = (await publishedArticles()).find(x => x.id === id);
+  const a = await getArticle(id);
   return a ? { title: `${a.title} — The H.E.L.F Review`, description: a.excerpt } : {};
 }
 
 export default async function Article({ params }) {
   const { id } = await params;
-  const [site, articles] = await Promise.all([read('site'), publishedArticles()]);
-  const a = articles.find(x => x.id === id);
+  const [site, a, articles] = await Promise.all([readSite(), getArticle(id), publishedArticles()]);
 
-  // Unknown id, or a draft — drafts are filtered out before we get here.
+  // Unknown id, or a draft — getArticle only returns published stories here.
   if (!a) notFound();
 
   const others = articles.filter(x => x.id !== a.id).slice(0, 3);

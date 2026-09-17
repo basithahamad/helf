@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // mysql2 loads parts of itself dynamically; keep it out of the server bundle.
+  serverExternalPackages: ['mysql2'],
+
   async headers() {
     return [
       {

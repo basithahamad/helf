@@ -1,4 +1,4 @@
-import { read, publishedArticles } from '../lib/store';
+import { readSite, publishedArticles } from '../lib/store';
 import { Masthead, SiteFooter } from './Chrome';
 import { SubscribeForm } from './Forms';
 
@@ -9,7 +9,7 @@ const href = a => a.url || `/article/${encodeURIComponent(a.id)}`;
 const img = s => (s?.startsWith('/') || s?.startsWith('data:') ? s : `/${s}`);
 
 export default async function Home() {
-  const [site, articles] = await Promise.all([read('site'), publishedArticles()]);
+  const [site, articles] = await Promise.all([readSite(), publishedArticles()]);
 
   const editor = site.editor || {};
   const about = site.about || {};

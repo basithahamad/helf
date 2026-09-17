@@ -17,7 +17,7 @@ export const SITE_SCHEMA = [
     { k: 'widgetHeading', label: 'Panel heading' },
     { k: 'name', label: 'Editor name' },
     { k: 'role', label: 'Role' },
-    { k: 'image', label: 'Headshot path' },
+    { k: 'image', label: 'Headshot', type: 'image', full: true },
     { k: 'bio', label: 'Short bio', type: 'textarea', full: true },
     { k: 'fullBioLabel', label: 'Full-bio link label' },
     { k: 'fullBioUrl', label: 'Full-bio link URL' }] },
@@ -38,7 +38,7 @@ export const COMMENTARY = {
   key: 'commentary',
   title: 'Commentary & Voices',
   hint: 'Pull-quote cards near the foot of the home page',
-  cols: [['quote', 'Quote', 'textarea'], ['name', 'Name'], ['title', 'Title / institution'], ['image', 'Photo path']]
+  cols: [['quote', 'Quote', 'textarea'], ['name', 'Name'], ['title', 'Title / institution'], ['image', 'Photo', 'image']]
 };
 
 export const CATEGORIES = [

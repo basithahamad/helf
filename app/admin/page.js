@@ -5,6 +5,36 @@ import './admin.css';
 import { SITE_SCHEMA, COMMENTARY, CATEGORIES } from './siteSchema';
 
 const CODE_KEY = 'helf_admin_code';
+const MAX_EDGE = 1600;
+
+// Paths kept from the original static site ("assets/img/…") have no leading
+// slash; uploads ("/media/…") do.
+const srcOf = s => (s?.startsWith('/') || s?.startsWith('data:') ? s : `/${s}`);
+
+// Shrink big camera files before they go over the wire. Formats the canvas
+// cannot re-encode faithfully (GIF, AVIF) are uploaded untouched.
+function downscale(file) {
+  return new Promise((resolve, reject) => {
+    if (!/^image\/(jpeg|png|webp)$/.test(file.type)) return resolve(file);
+    const rd = new FileReader();
+    rd.onerror = () => reject(new Error('Could not read that file'));
+    rd.onload = () => {
+      const im = new Image();
+      im.onerror = () => reject(new Error('That file is not an image'));
+      im.onload = () => {
+        const sc = Math.min(1, MAX_EDGE / Math.max(im.width, im.height));
+        if (sc === 1 && file.size < 1_500_000) return resolve(file);
+        const cv = document.createElement('canvas');
+        cv.width = Math.round(im.width * sc);
+        cv.height = Math.round(im.height * sc);
+        cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
+        cv.toBlob(b => resolve(b || file), 'image/jpeg', 0.85);
+      };
+      im.src = rd.result;
+    };
+    rd.readAsDataURL(file);
+  });
+}
 
 export default function Admin() {
   const [code, setCode] = useState(null);
@@ -20,6 +50,16 @@ export default function Admin() {
     [code]
   );
   const flash = m => { setToast(m); setTimeout(() => setToast(''), 2400); };
+
+  // Photos are stored as files on the server; the record only keeps the URL.
+  const upload = useCallback(async file => {
+    const body = new FormData();
+    body.append('file', file, file.name || 'upload.jpg');
+    const r = await fetch('/api/upload', { method: 'POST', headers: { 'x-admin-code': code || '' }, body });
+    const data = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(data.error || 'Upload failed');
+    return data.url;
+  }, [code]);
 
   useEffect(() => {
     const saved = sessionStorage.getItem(CODE_KEY);
@@ -83,6 +123,7 @@ export default function Admin() {
             onCancel={() => setEditing(null)}
             onSave={saveArticle}
             onDelete={deleteArticle}
+            onUpload={upload}
           />
         ) : (
           <div className="list-view">
@@ -103,7 +144,7 @@ export default function Admin() {
             </div>
 
             {isSite
-              ? <SiteForm site={site} setSite={setSite} dirty={dirty} setDirty={setDirty} onSave={saveSite} />
+              ? <SiteForm site={site} setSite={setSite} dirty={dirty} setDirty={setDirty} onSave={saveSite} onUpload={upload} />
               : <ArticleTable articles={articles} onEdit={setEditing} />}
           </div>
         )}
@@ -156,7 +197,7 @@ function ArticleTable({ articles, onEdit }) {
         <tbody>
           {articles.map(a => (
             <tr key={a.id}>
-              <td>{a.image ? <img className="thumb" src={a.image.startsWith('/') || a.image.startsWith('data:') ? a.image : `/${a.image}`} alt="" /> : <span className="thumb" />}</td>
+              <td>{a.image ? <img className="thumb" src={srcOf(a.image)} alt="" /> : <span className="thumb" />}</td>
               <td className="t-title">{a.title}<small>{a.date || ''}</small></td>
               <td className="t-hide"><span className="pill">{a.category || 'News'}</span></td>
               <td className="t-hide">{a.author || '—'}</td>
@@ -187,7 +228,7 @@ function ArticleTable({ articles, onEdit }) {
   );
 }
 
-function ArticleEditor({ article, onSave, onCancel, onDelete }) {
+function ArticleEditor({ article, onSave, onCancel, onDelete, onUpload }) {
   const a = article || {};
   const isNew = !a.id;
   const [f, setF] = useState({
@@ -197,6 +238,7 @@ function ArticleEditor({ article, onSave, onCancel, onDelete }) {
     featured: !!a.featured, image: a.image || ''
   });
   const set = (k, v) => setF(p => ({ ...p, [k]: v }));
+  const [imgMsg, setImgMsg] = useState('');
   const fileRef = useRef(null);
   const bodyRef = useRef(null);
 
@@ -204,21 +246,17 @@ function ArticleEditor({ article, onSave, onCancel, onDelete }) {
   // caret is in it. Seed once, read innerHTML on save.
   useEffect(() => { if (bodyRef.current) bodyRef.current.innerHTML = a.body || ''; }, [a.body]);
 
-  function pick(input) {
-    const file = input.files[0]; if (!file) return;
-    const rd = new FileReader();
-    rd.onload = () => {
-      const im = new Image();
-      im.onload = () => {
-        const max = 1600, sc = Math.min(1, max / Math.max(im.width, im.height));
-        const cv = document.createElement('canvas');
-        cv.width = im.width * sc; cv.height = im.height * sc;
-        cv.getContext('2d').drawImage(im, 0, 0, cv.width, cv.height);
-        set('image', cv.toDataURL('image/jpeg', 0.85));
-      };
-      im.src = rd.result;
-    };
-    rd.readAsDataURL(file);
+  async function pick(input) {
+    const file = input.files[0];
+    input.value = '';                       // so the same file can be picked twice
+    if (!file) return;
+    setImgMsg('Uploading…');
+    try {
+      set('image', await onUpload(await downscale(file)));
+      setImgMsg('');
+    } catch (err) {
+      setImgMsg(err.message || 'Upload failed');
+    }
   }
 
   const fmt = cmd => { document.execCommand(cmd, false, null); bodyRef.current?.focus(); };
@@ -274,8 +312,8 @@ function ArticleEditor({ article, onSave, onCancel, onDelete }) {
             <div className="full">
               <label>Main image</label>
               <div className="imgdrop" onClick={() => fileRef.current?.click()}>
-                {f.image && <img src={f.image.startsWith('/') || f.image.startsWith('data:') ? f.image : `/${f.image}`} alt="" />}
-                <span>{f.image ? 'Click to replace photo' : 'Click to upload a photo (JPG/PNG)'}</span>
+                {f.image && <img src={srcOf(f.image)} alt="" />}
+                <span>{imgMsg || (f.image ? 'Click to replace photo' : 'Click to upload a photo (JPG/PNG)')}</span>
               </div>
               <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => pick(e.target)} />
             </div>
@@ -308,7 +346,47 @@ function ArticleEditor({ article, onSave, onCancel, onDelete }) {
   );
 }
 
-function SiteForm({ site, setSite, dirty, setDirty, onSave }) {
+// A stored image path plus an Upload button. The text box stays editable so an
+// existing asset path can still be typed or pasted.
+function ImageField({ label, value, onChange, onUpload }) {
+  const ref = useRef(null);
+  const [msg, setMsg] = useState('');
+
+  async function pick(input) {
+    const file = input.files[0];
+    input.value = '';
+    if (!file) return;
+    setMsg('Uploading…');
+    try {
+      onChange(await onUpload(await downscale(file)));
+      setMsg('');
+    } catch (err) {
+      setMsg(err.message || 'Upload failed');
+    }
+  }
+
+  return (
+    <>
+      <label>{label}</label>
+      <div className="imgfield">
+        <div className="imgfield-thumb" onClick={() => ref.current?.click()}>
+          {value ? <img src={srcOf(value)} alt="" /> : <span>none</span>}
+        </div>
+        <div className="imgfield-main">
+          <input type="text" value={value ?? ''} placeholder="/media/… or assets/img/…"
+            onChange={e => onChange(e.target.value)} />
+          <div className="imgfield-row">
+            <button type="button" className="btn btn-ghost btn-sm" onClick={() => ref.current?.click()}>Upload photo</button>
+            <small>{msg}</small>
+          </div>
+        </div>
+      </div>
+      <input ref={ref} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => pick(e.target)} />
+    </>
+  );
+}
+
+function SiteForm({ site, setSite, dirty, setDirty, onSave, onUpload }) {
   if (!site) return <div className="card" style={{ padding: '2rem' }}>Loading…</div>;
 
   const touch = fn => { setSite(prev => { const next = structuredClone(prev); fn(next); return next; }); setDirty(true); };
@@ -336,10 +414,15 @@ function SiteForm({ site, setSite, dirty, setDirty, onSave }) {
             <div className="site-body">
               {sec.fields.map(f => (
                 <div className={f.full ? 'full' : ''} key={f.k}>
-                  <label>{f.label}</label>
-                  {f.type === 'textarea'
-                    ? <textarea value={d[f.k] ?? ''} onChange={e => setField(sec.key, f.k, e.target.value)} />
-                    : <input type="text" value={d[f.k] ?? ''} onChange={e => setField(sec.key, f.k, e.target.value)} />}
+                  {f.type === 'image'
+                    ? <ImageField label={f.label} value={d[f.k]} onUpload={onUpload}
+                        onChange={v => setField(sec.key, f.k, v)} />
+                    : <>
+                        <label>{f.label}</label>
+                        {f.type === 'textarea'
+                          ? <textarea value={d[f.k] ?? ''} onChange={e => setField(sec.key, f.k, e.target.value)} />
+                          : <input type="text" value={d[f.k] ?? ''} onChange={e => setField(sec.key, f.k, e.target.value)} />}
+                      </>}
                 </div>
               ))}
             </div>
@@ -357,10 +440,15 @@ function SiteForm({ site, setSite, dirty, setDirty, onSave }) {
               <div className="lfields">
                 {COMMENTARY.cols.map(([ck, clabel, ctype]) => (
                   <div key={ck}>
-                    <label>{clabel}</label>
-                    {ctype === 'textarea'
-                      ? <textarea style={{ minHeight: 70 }} value={c[ck] ?? ''} onChange={e => setCell(i, ck, e.target.value)} />
-                      : <input type="text" value={c[ck] ?? ''} onChange={e => setCell(i, ck, e.target.value)} />}
+                    {ctype === 'image'
+                      ? <ImageField label={clabel} value={c[ck]} onUpload={onUpload}
+                          onChange={v => setCell(i, ck, v)} />
+                      : <>
+                          <label>{clabel}</label>
+                          {ctype === 'textarea'
+                            ? <textarea style={{ minHeight: 70 }} value={c[ck] ?? ''} onChange={e => setCell(i, ck, e.target.value)} />
+                            : <input type="text" value={c[ck] ?? ''} onChange={e => setCell(i, ck, e.target.value)} />}
+                        </>}
                   </div>
                 ))}
               </div>
