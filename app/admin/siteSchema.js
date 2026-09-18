@@ -4,7 +4,9 @@
 export const SITE_SCHEMA = [
   { key: 'seo', title: 'Search Engines & Browser Tab', hint: 'What Google and the browser tab show', fields: [
     { k: 'title', label: 'Site title', full: true },
-    { k: 'description', label: 'Site description', type: 'textarea', full: true }] },
+    { k: 'description', label: 'Site description', type: 'textarea', full: true },
+    { k: 'siteName', label: 'Name used when the site is shared' },
+    { k: 'ogImage', label: 'Sharing image — shown on social media and chat previews', type: 'image', full: true }] },
 
   { key: 'brand', title: 'Masthead', hint: 'The header at the top of every page', fields: [
     { k: 'name', label: 'Publication name — first part' },

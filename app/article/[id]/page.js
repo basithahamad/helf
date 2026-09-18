@@ -9,7 +9,34 @@ const img = s => (s?.startsWith('/') || s?.startsWith('data:') ? s : `/${s}`);
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const [a, site] = await Promise.all([getArticle(id), readSite()]);
-  return a ? { title: `${a.title} — ${site.seo?.title || ''}`, description: a.excerpt } : {};
+  if (!a) return {};
+
+  const url = `/article/${encodeURIComponent(a.id)}`;
+  // A story's own photo is a better share image than the site default.
+  const image = a.image || site.seo?.ogImage || '/assets/img/helf-lead.jpg';
+
+  return {
+    title: `${a.title} — ${site.seo?.title || ''}`,
+    description: a.excerpt,
+    alternates: { canonical: url },
+    openGraph: {
+      type: 'article',
+      title: a.title,
+      description: a.excerpt,
+      url,
+      siteName: site.seo?.siteName || site.seo?.title,
+      publishedTime: a.createdAt,
+      authors: a.author ? [a.author] : undefined,
+      section: a.category,
+      images: [{ url: image, alt: a.title }]
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: a.title,
+      description: a.excerpt,
+      images: [image]
+    }
+  };
 }
 
 export default async function Article({ params }) {
@@ -21,8 +48,28 @@ export default async function Article({ params }) {
 
   const others = articles.filter(x => x.id !== a.id).slice(0, 3);
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: a.title,
+    description: a.excerpt || undefined,
+    image: a.image ? [a.image] : undefined,
+    datePublished: a.createdAt || undefined,
+    author: a.author ? [{ '@type': 'Person', name: a.author }] : undefined,
+    publisher: {
+      '@type': 'Organization',
+      name: site.seo?.siteName || site.seo?.title,
+      logo: site.brand?.logo ? { '@type': 'ImageObject', url: site.brand.logo } : undefined
+    },
+    articleSection: a.category || undefined,
+    mainEntityOfPage: `/article/${encodeURIComponent(a.id)}`
+  };
+
   return (
     <>
+      <script type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
       <Masthead site={site} />
 
       <article className="single">

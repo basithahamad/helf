@@ -3,6 +3,7 @@ import { categoryHref } from '../lib/categories';
 import { Masthead, SiteFooter } from './Chrome';
 import { SubscribeForm } from './Forms';
 import { ArticleList } from './ArticleList';
+import { SITE_URL } from './layout';
 
 // Articles are edited through /admin and must appear immediately.
 export const dynamic = 'force-dynamic';
@@ -20,8 +21,37 @@ export default async function Home() {
   const featured = articles.find(a => a.featured) || articles[0];
   const rest = articles.filter(a => a !== featured);
 
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'NewsMediaOrganization',
+        name: site.seo?.siteName || site.seo?.title,
+        url: SITE_URL,
+        logo: site.brand?.logo ? `${SITE_URL}${site.brand.logo}` : undefined,
+        parentOrganization: site.footer?.orgName
+          ? { '@type': 'Organization', name: site.footer.orgName, url: site.footer.parentLinkUrl }
+          : undefined
+      },
+      {
+        '@type': 'WebSite',
+        name: site.seo?.siteName || site.seo?.title,
+        url: SITE_URL,
+        // Lets search engines offer a search box straight into the site.
+        potentialAction: {
+          '@type': 'SearchAction',
+          target: { '@type': 'EntryPoint', urlTemplate: `${SITE_URL}/search?q={search_term_string}` },
+          'query-input': 'required name=search_term_string'
+        }
+      }
+    ]
+  };
+
   return (
     <>
+      <script type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
       <Masthead site={site} />
 
       {featured && (

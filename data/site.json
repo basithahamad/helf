@@ -1,7 +1,9 @@
 {
   "seo": {
     "title": "The H.E.L.F Review — News & Analysis on HBCU Leadership",
-    "description": "Published by the Higher Education Leadership Foundation. News, analysis and commentary on the trends, challenges and leaders shaping HBCUs and higher education."
+    "description": "Published by the Higher Education Leadership Foundation. News, analysis and commentary on the trends, challenges and leaders shaping HBCUs and higher education.",
+    "siteName": "The H.E.L.F Review",
+    "ogImage": "/assets/img/helf-lead.jpg"
   },
   "brand": {
     "name": "The H.E.L.F",

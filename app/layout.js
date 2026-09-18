@@ -1,13 +1,45 @@
 import './globals.css';
 import { readSite } from '../lib/store';
 
-// Title and description come from the site document, so SEO copy is editable in
-// the admin like everything else.
+// Absolute URLs are required for Open Graph and canonical tags; the domain is a
+// deployment fact rather than content, so it comes from the environment.
+export const SITE_URL = process.env.SITE_URL || 'https://thehelfreview.com';
+
+// Title, description and the sharing image all come from the site document, so
+// SEO copy is editable in the admin like everything else.
 export async function generateMetadata() {
   const site = await readSite().catch(() => ({}));
+  const seo = site.seo || {};
+  const title = seo.title || '';
+  const description = seo.description || '';
+  const image = seo.ogImage || '/assets/img/helf-lead.jpg';
+
   return {
-    title: site.seo?.title || '',
-    description: site.seo?.description || ''
+    metadataBase: new URL(SITE_URL),
+    title,
+    description,
+    applicationName: seo.siteName || title,
+    alternates: { canonical: '/' },
+    openGraph: {
+      type: 'website',
+      siteName: seo.siteName || title,
+      title,
+      description,
+      url: '/',
+      locale: 'en_US',
+      images: [{ url: image, width: 1400, height: 933, alt: title }]
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image]
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 }
+    }
   };
 }
 
