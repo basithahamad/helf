@@ -87,6 +87,12 @@ export function RichText({ editorRef, initialHtml = '', withPullQuote = false })
       '<div class="pull"><q>Quote goes here</q><cite>Who said it</cite></div><p><br></p>');
   }
 
+  // A section break on its own, as opposed to the rules a pull quote draws.
+  function insertDivider() {
+    restore();
+    run('insertHTML', '<hr><p><br></p>');
+  }
+
   // Buttons use onMouseDown + preventDefault so the selection survives the click.
   const Btn = ({ onPress, title, children, wide }) => (
     <button type="button" title={title} className={wide ? 'wide' : undefined}
@@ -119,6 +125,7 @@ export function RichText({ editorRef, initialHtml = '', withPullQuote = false })
         <Btn onPress={addLink} title="Add link" wide>🔗 Link</Btn>
         <Btn onPress={() => run('unlink')} title="Remove link" wide>Unlink</Btn>
         {withPullQuote && <Btn onPress={insertPullQuote} title="Insert a pull quote" wide>❝ Pull quote</Btn>}
+        {withPullQuote && <Btn onPress={insertDivider} title="Insert a divider line" wide>— Divider</Btn>}
 
         <span className="rte-sep" />
 

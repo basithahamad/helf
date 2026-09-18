@@ -235,6 +235,7 @@
 .article-body .pull q{font-family:'DM Serif Display',serif;font-style:italic;font-size:1.45rem;line-height:1.45;color:var(--crimson-ink);quotes:none;display:block}
 .article-body .pull cite{display:block;margin-top:1rem;font-family:'Inter',sans-serif;font-style:normal;font-size:.76rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
 .article-body .endmark::after{content:" ◼";color:var(--crimson);font-size:.8em}
+.article-body hr{border:none;height:1px;background:var(--gold);opacity:.8;margin:2.8rem 0}
 .article-body .source-note{font-size:.88rem;color:var(--muted);border-left:3px solid var(--gold);padding-left:1rem;font-style:italic}
 
 .author-card{background:var(--card);border-radius:calc(var(--r) + 4px);box-shadow:var(--shadow);padding:2.4rem;margin:2.5rem 0;display:grid;grid-template-columns:150px 1fr;gap:2rem;align-items:start;position:relative;overflow:hidden;font-family:'Inter',sans-serif}

@@ -71,6 +71,7 @@
   .rte ul{margin:0 0 .7rem 1.3rem}
   /* <q> adds its own quotation marks on top of the typed ones. */
   .rte q{quotes:none}
+  .rte hr{border:none;height:1px;background:var(--gold);opacity:.8;margin:1.4rem 0}
   .rte .pull{border-top:1px solid var(--gold);border-bottom:1px solid var(--gold);padding:1rem;margin:1rem 0;text-align:center}
   .rte .pull q{display:block;font-style:italic;color:var(--crimson-ink);font-size:1.05rem}
   .rte .pull cite{display:block;margin-top:.5rem;font-style:normal;font-size:.7rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
