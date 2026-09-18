@@ -48,7 +48,7 @@
   form .grid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;padding:1.8rem}
   form .full{grid-column:1/-1}
   label{display:block;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--crimson-ink);margin-bottom:.35rem}
-  input[type=text],select,textarea{width:100%;padding:.75rem .9rem;border:1.5px solid var(--hairline);border-radius:10px;font:inherit;font-size:.9rem;background:var(--paper)}
+  input[type=text],input[type=password],input[type=email],input[type=search],select,textarea{width:100%;padding:.75rem .9rem;border:1.5px solid var(--hairline);border-radius:10px;font:inherit;font-size:.9rem;background:var(--paper)}
   input:focus,select:focus,textarea:focus,.rte:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 4px rgba(200,164,94,.16);background:#fff}
   textarea{min-height:70px;resize:vertical}
   .rte-bar{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem;margin-bottom:.5rem;padding:.45rem;border:1.5px solid var(--hairline);border-radius:10px;background:#fbfaf7}
@@ -96,7 +96,9 @@
   #gate .box{background:#fff;border-radius:16px;padding:2.4rem;width:min(380px,90vw);text-align:center}
   #gate h2{font-family:'DM Serif Display',serif;font-weight:400;color:var(--crimson-ink);margin:.6rem 0 .2rem}
   #gate p{font-size:.82rem;color:var(--muted);margin-bottom:1.2rem}
-  #gate input{text-align:center;margin-bottom:.8rem}
+  #gate form{display:block}
+  #gate input[type=password]{text-align:center;letter-spacing:.14em;font-size:1rem;padding:.85rem .9rem;background:#fff}
+  #gate input[type=password]::placeholder{letter-spacing:.04em;color:#a9a39a}
   #gate .err{color:#a3273a;font-size:.78rem;min-height:1.1rem;margin-top:.4rem}
   .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--crimson-ink);color:#fff;padding:.8rem 1.5rem;border-radius:999px;font-size:.85rem;font-weight:600;transition:.3s;opacity:0}
   .toast.show{transform:translateX(-50%);opacity:1}
