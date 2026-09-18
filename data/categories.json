@@ -1,0 +1,11 @@
+[
+  { "name": "Featured Stories", "slug": "featured-stories", "sortOrder": 0, "inNav": true, "inFooter": true },
+  { "name": "Latest News", "slug": "latest-news", "sortOrder": 1, "inNav": true, "inFooter": true },
+  { "name": "Leadership", "slug": "leadership", "sortOrder": 2, "inNav": true, "inFooter": false },
+  { "name": "HBCU Spotlight", "slug": "hbcu-spotlight", "sortOrder": 3, "inNav": true, "inFooter": false },
+  { "name": "Events", "slug": "events", "sortOrder": 4, "inNav": true, "inFooter": true },
+  { "name": "Announcements", "slug": "announcements", "sortOrder": 5, "inNav": true, "inFooter": true },
+  { "name": "Commentary", "slug": "commentary", "sortOrder": 6, "inNav": true, "inFooter": true },
+  { "name": "Research & Policy", "slug": "research-policy", "sortOrder": 7, "inNav": true, "inFooter": false },
+  { "name": "Alumni Voices", "slug": "alumni-voices", "sortOrder": 8, "inNav": true, "inFooter": false }
+]

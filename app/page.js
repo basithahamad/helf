@@ -4,12 +4,6 @@ import { Masthead, SiteFooter } from './Chrome';
 import { SubscribeForm } from './Forms';
 import { ArticleList } from './ArticleList';
 
-// Shown until the editor adds their own in the admin's Site Content tab.
-const DEFAULT_EVENTS = [
-  { day: '15', month: 'May', title: 'Ideation, Innovation & Collaboration Convening', meta: 'Virginia State University' },
-  { day: '—', month: 'TBA', title: 'H.E.L.F. Leadership Institute', meta: 'Dates to be announced' }
-];
-
 // Articles are edited through /admin and must appear immediately.
 export const dynamic = 'force-dynamic';
 
@@ -33,8 +27,8 @@ export default async function Home() {
       {featured && (
         <div className="ticker">
           <div className="wrap">
-            <b>Featured</b>
-            <span><a href={href(featured)}>“{featured.title}” Read the story →</a></span>
+            <b>{sections.featuredLabel}</b>
+            <span><a href={href(featured)}>“{featured.title}” {sections.featuredReadMore}</a></span>
           </div>
         </div>
       )}
@@ -77,9 +71,9 @@ export default async function Home() {
             <div>
               <div className="sec-head">
                 <h2>{sections.latestHeading}</h2>
-                <a href="/news">View All →</a>
+                <a href="/news">{sections.viewAllLabel}</a>
               </div>
-              <ArticleList articles={articles} empty="No articles published yet." />
+              <ArticleList articles={articles} empty={sections.emptyMessage} />
             </div>
 
             <aside>
@@ -95,7 +89,7 @@ export default async function Home() {
               </div>
 
               <div className="widget">
-                <h3>Most Read</h3>
+                <h3>{sections.mostReadHeading}</h3>
                 {articles.slice(0, 4).map((a, i) => (
                   <div className="mini" key={a.id}>
                     <span className="n">{i + 1}</span>
@@ -105,8 +99,8 @@ export default async function Home() {
               </div>
 
               <div className="widget">
-                <h3>{sections.eventsHeading || 'Upcoming Events'}</h3>
-                {(site.events?.length ? site.events : DEFAULT_EVENTS).map((e, i) => (
+                <h3>{sections.eventsHeading}</h3>
+                {(site.events || []).map((e, i) => (
                   <div className="event" key={i}>
                     <div className="date-chip"><b>{e.day}</b><span>{e.month}</span></div>
                     <div>
@@ -135,11 +129,8 @@ export default async function Home() {
         <div className="wrap">
           <div className="inner">
             <div>
-              <h2>Get <i>{site.brand?.name} {site.brand?.nameEm}</i> in your inbox</h2>
-              <p>
-                Featured stories, event announcements, and leadership insights from the
-                Higher Education Leadership Foundation.
-              </p>
+              <h2>{sections.subscribeHeading}</h2>
+              <p>{sections.subscribeBlurb}</p>
             </div>
             <SubscribeForm />
           </div>
@@ -150,7 +141,8 @@ export default async function Home() {
         <div className="wrap">
           <div className="sec-head">
             <h2>{sections.commentaryHeading}</h2>
-            <a href={categoryHref('Commentary')}>All Commentary →</a>
+            {/* Which category that link opens is itself a setting, not an assumption. */}
+            <a href={categoryHref(sections.allCommentarySlug)}>{sections.allCommentaryLabel}</a>
           </div>
           <div className="comm-grid">
             {(site.commentary || []).map((c, i) => (

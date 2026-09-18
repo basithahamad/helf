@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import './admin.css';
-import { SITE_SCHEMA, LISTS, CATEGORIES } from './siteSchema';
+import { SITE_SCHEMA, LISTS } from './siteSchema';
 
 const CODE_KEY = 'helf_admin_code';
 const MAX_EDGE = 1600;
@@ -41,6 +41,7 @@ export default function Admin() {
   const [articles, setArticles] = useState([]);
   const [site, setSite] = useState(null);
   const [subs, setSubs] = useState(null);
+  const [cats, setCats] = useState([]);
   const [tab, setTab] = useState('articles');
   const [editing, setEditing] = useState(null);   // article object | {} for new | null
   const [dirty, setDirty] = useState(false);
@@ -72,7 +73,12 @@ export default function Admin() {
     if (r.ok) setArticles(await r.json());
   }, [headers]);
 
-  useEffect(() => { if (code) loadArticles(); }, [code, loadArticles]);
+  const loadCats = useCallback(async () => {
+    const r = await fetch('/api/categories');
+    if (r.ok) setCats(await r.json());
+  }, []);
+
+  useEffect(() => { if (code) { loadArticles(); loadCats(); } }, [code, loadArticles, loadCats]);
   useEffect(() => {
     if (!code || tab !== 'site' || site) return;
     fetch('/api/site').then(r => r.json()).then(setSite).catch(() => setSite({}));
@@ -110,10 +116,21 @@ export default function Admin() {
     else flash('Save failed — try signing in again');
   }
 
-  const TITLES = { articles: 'Articles', site: 'Site Content', subscribers: 'Subscribers' };
+  async function saveCats(next) {
+    const r = await fetch('/api/categories', {
+      method: 'PUT', headers: headers(), body: JSON.stringify(next)
+    });
+    if (r.ok) { setCats(await r.json()); flash('Categories saved'); }
+    else flash((await r.json().catch(() => ({}))).error || 'Save failed');
+  }
+
+  const TITLES = {
+    articles: 'Articles', site: 'Site Content', categories: 'Categories', subscribers: 'Subscribers'
+  };
   const NOTES = {
     articles: 'Changes appear on the site immediately. Drafts are only visible here.',
     site: 'Edit the wording on the public page. Layout, colours and fonts are fixed by the design and are not editable here.',
+    categories: 'These drive the top navigation, the footer column and the category dropdown when writing an article. Renaming one moves its articles with it.',
     subscribers: 'Everyone who has signed up through the newsletter form on the public site.'
   };
 
@@ -134,6 +151,7 @@ export default function Admin() {
         {editing ? (
           <ArticleEditor
             article={editing}
+            categories={cats}
             onCancel={() => setEditing(null)}
             onSave={saveArticle}
             onDelete={deleteArticle}
@@ -157,9 +175,11 @@ export default function Admin() {
 
             {tab === 'site'
               ? <SiteForm site={site} setSite={setSite} dirty={dirty} setDirty={setDirty} onSave={saveSite} onUpload={upload} />
-              : tab === 'subscribers'
-                ? <SubscriberTable subs={subs} />
-                : <ArticleTable articles={articles} onEdit={setEditing} />}
+              : tab === 'categories'
+                ? <CategoryEditor cats={cats} onSave={saveCats} />
+                : tab === 'subscribers'
+                  ? <SubscriberTable subs={subs} />
+                  : <ArticleTable articles={articles} onEdit={setEditing} />}
           </div>
         )}
       </main>
@@ -242,6 +262,84 @@ function ArticleTable({ articles, onEdit }) {
   );
 }
 
+// The category list itself — order, naming and where each one appears.
+function CategoryEditor({ cats, onSave }) {
+  const [rows, setRows] = useState(cats);
+  const [dirty, setDirty] = useState(false);
+
+  useEffect(() => { setRows(cats); setDirty(false); }, [cats]);
+
+  const touch = fn => { setRows(prev => { const next = structuredClone(prev); fn(next); return next; }); setDirty(true); };
+  const set = (i, k, v) => touch(n => { n[i][k] = v; });
+  const move = (i, d) => touch(n => {
+    const j = i + d;
+    if (j < 0 || j >= n.length) return;
+    [n[i], n[j]] = [n[j], n[i]];
+  });
+  const remove = i => {
+    const c = rows[i];
+    if (confirm(`Remove “${c.name}”? Articles already in it keep the label but the menu link goes away.`)) {
+      touch(n => n.splice(i, 1));
+    }
+  };
+  const add = () => touch(n => n.push({ name: '', slug: '', inNav: true, inFooter: false }));
+
+  return (
+    <>
+      <div className="card">
+        <table>
+          <thead>
+            <tr>
+              <th style={{ width: 40 }} />
+              <th>Name</th>
+              <th className="t-hide">Web address</th>
+              <th style={{ textAlign: 'center' }}>Top menu</th>
+              <th style={{ textAlign: 'center' }}>Footer</th>
+              <th style={{ textAlign: 'right' }}>Order</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((c, i) => (
+              <tr key={c.id ?? `new-${i}`}>
+                <td style={{ color: 'var(--muted)' }}>{String(i + 1).padStart(2, '0')}</td>
+                <td>
+                  <input type="text" value={c.name ?? ''} placeholder="Category name"
+                    onChange={e => set(i, 'name', e.target.value)} />
+                </td>
+                <td className="t-hide" style={{ color: 'var(--muted)', fontSize: '.8rem' }}>
+                  /category/{c.slug || '…'}
+                </td>
+                <td style={{ textAlign: 'center' }}>
+                  <input type="checkbox" checked={c.inNav !== false}
+                    onChange={e => set(i, 'inNav', e.target.checked)} />
+                </td>
+                <td style={{ textAlign: 'center' }}>
+                  <input type="checkbox" checked={!!c.inFooter}
+                    onChange={e => set(i, 'inFooter', e.target.checked)} />
+                </td>
+                <td>
+                  <div className="actions">
+                    <button type="button" className="mini" disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
+                    <button type="button" className="mini" disabled={i === rows.length - 1} onClick={() => move(i, 1)}>↓</button>
+                    <button type="button" className="mini del" onClick={() => remove(i)}>✕</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div style={{ padding: '1rem 1.2rem' }}>
+          <button type="button" className="add-row" onClick={add}>＋ Add Category</button>
+        </div>
+      </div>
+      <div className="site-foot">
+        <span className="dirty-note">{dirty ? 'Unsaved changes' : ''}</span>
+        <button className="btn btn-crimson" onClick={() => onSave(rows)}>Save Categories</button>
+      </div>
+    </>
+  );
+}
+
 function SubscriberTable({ subs }) {
   if (!subs) return <div className="card" style={{ padding: '2rem' }}>Loading…</div>;
 
@@ -281,11 +379,11 @@ function SubscriberTable({ subs }) {
   );
 }
 
-function ArticleEditor({ article, onSave, onCancel, onDelete, onUpload }) {
+function ArticleEditor({ article, categories, onSave, onCancel, onDelete, onUpload }) {
   const a = article || {};
   const isNew = !a.id;
   const [f, setF] = useState({
-    title: a.title || '', category: a.category || 'Latest News', author: a.author || '',
+    title: a.title || '', category: a.category || categories[0]?.name || '', author: a.author || '',
     date: a.date || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
     excerpt: a.excerpt || '', status: a.status === 'draft' ? 'draft' : 'published',
     featured: !!a.featured, image: a.image || ''
@@ -334,7 +432,11 @@ function ArticleEditor({ article, onSave, onCancel, onDelete, onUpload }) {
 
             <div><label>Category</label>
               <select value={f.category} onChange={e => set('category', e.target.value)}>
-                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                {/* An article may sit in a category that has since been renamed
+                    or removed — keep showing it rather than silently reassigning. */}
+                {!categories.some(c => c.name === f.category) && f.category &&
+                  <option key="current">{f.category}</option>}
+                {categories.map(c => <option key={c.id}>{c.name}</option>)}
               </select></div>
 
             <div><label>Author</label>

@@ -4,7 +4,10 @@ import { ArticleList } from '../ArticleList';
 
 export const dynamic = 'force-dynamic';
 
-export const metadata = { title: 'Search — The H.E.L.F Review' };
+export async function generateMetadata() {
+  const site = await readSite();
+  return { title: `${site.sections?.searchHeading || 'Search'} — ${site.seo?.title || ''}` };
+}
 
 export default async function Search({ searchParams }) {
   const { q = '' } = await searchParams;
@@ -13,6 +16,7 @@ export default async function Search({ searchParams }) {
     readSite(),
     term ? searchArticles(term) : Promise.resolve([])
   ]);
+  const sections = site.sections || {};
 
   return (
     <>
@@ -20,13 +24,16 @@ export default async function Search({ searchParams }) {
       <section className="latest">
         <div className="wrap">
           <div className="sec-head">
-            <h2>{term ? `Search: “${term}”` : 'Search'}</h2>
+            <h2>{term ? `${sections.searchHeading}: “${term}”` : sections.searchHeading}</h2>
             {term && <span className="meta">{results.length} result{results.length === 1 ? '' : 's'}</span>}
           </div>
           {term
-            ? <ArticleList articles={results} empty={`Nothing matched “${term}”. Try a different word.`} />
+            ? <ArticleList
+                articles={results}
+                empty={(sections.searchEmptyMessage || '').replace('{query}', term)}
+              />
             : <p style={{ color: 'var(--muted)', padding: '2rem 0' }}>
-                Type a word or phrase in the search box above to find stories.
+                {sections.searchPromptMessage}
               </p>}
         </div>
       </section>

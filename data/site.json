@@ -1,10 +1,24 @@
 {
+  "seo": {
+    "title": "The H.E.L.F Review — News & Analysis on HBCU Leadership",
+    "description": "Published by the Higher Education Leadership Foundation. News, analysis and commentary on the trends, challenges and leaders shaping HBCUs and higher education."
+  },
   "brand": {
     "name": "The H.E.L.F",
     "nameEm": "Review",
     "tagline": "Published by the Higher Education Leadership Foundation",
     "subscribeLabel": "Subscribe",
-    "searchPlaceholder": "Search stories…"
+    "searchPlaceholder": "Search stories…",
+    "logo": "/assets/img/helf-logo.png",
+    "logoAlt": "H.E.L.F. — Higher Education Leadership Foundation crest",
+    "homeLabel": "Home",
+    "utilityDate": ""
+  },
+  "utility": {
+    "mainSiteLabel": "H.E.L.F Main Site ↗",
+    "mainSiteUrl": "https://heleaders.org/",
+    "aboutLabel": "About",
+    "newsletterLabel": "Newsletter"
   },
   "about": {
     "heading": "About The H.E.L.F Review",
@@ -17,15 +31,30 @@
     "name": "Dr. Jamal Watson",
     "role": "Editor",
     "bio": "Dr. Jamal Watson is the editor of The H.E.L.F Review. An award-winning journalist and author, Watson previously served as the executive editor of Diverse: Issues In Higher Education. He is currently a professor and associate dean of graduate studies at Trinity Washington University.",
-    "image": "assets/img/watson-editor.png",
+    "image": "/assets/img/watson-editor.png",
     "fullBioLabel": "Full Bio →",
-    "fullBioUrl": "article-lightning-in-a-bottle.html#about-the-editor"
+    "fullBioUrl": "/article/lightning-in-a-bottle#about-the-editor"
   },
   "sections": {
     "latestHeading": "Latest News",
+    "viewAllLabel": "View All →",
     "commentaryHeading": "Commentary & Voices",
+    "allCommentaryLabel": "All Commentary →",
+    "allCommentarySlug": "commentary",
     "eventsHeading": "Upcoming Events",
-    "subscribeHeading": "Get The H.E.L.F Review in your inbox"
+    "mostReadHeading": "Most Read",
+    "moreFromHeading": "More from The Review",
+    "allStoriesHeading": "All Stories",
+    "subscribeHeading": "Get The H.E.L.F Review in your inbox",
+    "subscribeBlurb": "Featured stories, event announcements, and leadership insights from the Higher Education Leadership Foundation.",
+    "featuredLabel": "Featured",
+    "featuredReadMore": "Read the story →",
+    "staffByline": "Staff",
+    "emptyMessage": "No articles published yet.",
+    "emptyCategoryMessage": "No stories in {category} yet — they'll appear here as they're published.",
+    "searchHeading": "Search",
+    "searchPromptMessage": "Type a word or phrase in the search box above to find stories.",
+    "searchEmptyMessage": "Nothing matched “{query}”. Try a different word."
   },
   "events": [
     {
@@ -48,25 +77,39 @@
       "quote": "We just knew that there was something — there was a void. And we couldn't codify it. We initially thought we needed a gathering space for like-minded individuals who want to serve at HBCUs.",
       "name": "Dr. Herman J. Felton Jr.",
       "title": "President & CEO, Wiley University · from “Lightning in a Bottle”",
-      "image": "assets/img/helf-a1.jpg"
+      "image": "/assets/img/helf-a1.jpg"
     },
     {
       "quote": "Placeholder pull quote — commentary cards highlight the voices and perspectives of the H.E.L.F. community of leaders.",
       "name": "Author Name",
       "title": "Title, Institution",
-      "image": "assets/img/helf-a2.jpg"
+      "image": "/assets/img/helf-a2.jpg"
     },
     {
       "quote": "Placeholder pull quote — each card links to the full opinion article with the author's biography and photo.",
       "name": "Author Name",
       "title": "Title, Institution",
-      "image": "assets/img/helf-a3.jpg"
+      "image": "/assets/img/helf-a3.jpg"
     }
   ],
   "footer": {
+    "orgName": "Higher Education Leadership Foundation",
     "blurb": "Published by the Higher Education Leadership Foundation, The H.E.L.F Review delivers news, analysis, and commentary on the trends, challenges, and leaders shaping HBCUs and higher education broadly.",
+    "sectionsHeading": "Sections",
+    "aboutHeading": "About",
+    "allStoriesLabel": "All Stories",
     "parentLinkLabel": "H.E.L.F Main Site ↗",
     "parentLinkUrl": "https://heleaders.org/",
-    "copyright": "© 2026 The H.E.L.F Review · Higher Education Leadership Foundation. All rights reserved."
+    "aboutReviewLabel": "About The Review",
+    "newsletterLabel": "Newsletter",
+    "copyright": "© 2026 The H.E.L.F Review · Higher Education Leadership Foundation. All rights reserved.",
+    "privacyLabel": "Privacy Policy",
+    "termsLabel": "Terms of Use"
+  },
+  "legal": {
+    "privacyHeading": "Privacy Policy",
+    "privacy": "The H.E.L.F Review is published by the Higher Education Leadership Foundation. This page explains what we collect and why.\n\nIf you sign up for our newsletter we store the name and email address you give us, so that we can send you the newsletter. We do not sell or share that information, and every email includes a link to unsubscribe.\n\nOur server keeps standard web logs — the page requested, the time, and the requesting IP address — which we use to keep the site running and secure. We do not use advertising or tracking cookies.\n\nTo ask what we hold about you, or to have it deleted, write to us and we will act on the request.",
+    "termsHeading": "Terms of Use",
+    "terms": "The articles, photographs and other material on The H.E.L.F Review are published by the Higher Education Leadership Foundation and are protected by copyright.\n\nYou are welcome to read, link to and quote briefly from our work with attribution to The H.E.L.F Review. Republishing a full article, or using our photographs elsewhere, requires written permission.\n\nWe take care to be accurate. If you believe something we have published is wrong, tell us and we will review it and correct the record where correction is due.\n\nThe site is provided as it is. Links to other organisations are offered for convenience and we are not responsible for what those sites publish."
   }
 }

@@ -8,8 +8,8 @@ const img = s => (s?.startsWith('/') || s?.startsWith('data:') ? s : `/${s}`);
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
-  const a = await getArticle(id);
-  return a ? { title: `${a.title} — The H.E.L.F Review`, description: a.excerpt } : {};
+  const [a, site] = await Promise.all([getArticle(id), readSite()]);
+  return a ? { title: `${a.title} — ${site.seo?.title || ''}`, description: a.excerpt } : {};
 }
 
 export default async function Article({ params }) {
@@ -26,37 +26,37 @@ export default async function Article({ params }) {
       <Masthead site={site} />
 
       <article className="single">
-        <div className="wrap narrow">
-          <span className="kicker solid">{a.category || 'News'}</span>
+        <header className="article-head">
+          {a.category && <div className="cat">{a.category}</div>}
           <h1>{a.title}</h1>
-          {a.excerpt && <p className="dek">{a.excerpt}</p>}
+          {a.excerpt && <p className="standfirst">{a.excerpt}</p>}
           <div className="byline">
-            By <b>{a.author || 'Staff'}</b>{a.date ? ` · ${a.date}` : ''}
+            <span className="who">
+              <b>By {a.author || site.sections?.staffByline}</b>
+              <span>{a.date || ''}</span>
+            </span>
           </div>
-        </div>
+        </header>
 
         {a.image && (
-          <div className="wrap">
-            <figure className="hero-figure">
+          <div className="article-hero">
+            <figure>
               <img src={img(a.image)} alt={a.title} />
-              {a.caption && <figcaption>{a.caption}</figcaption>}
+              {a.caption && <figcaption dangerouslySetInnerHTML={{ __html: a.caption }} />}
             </figure>
           </div>
         )}
 
-        <div className="wrap narrow">
-          {a.body
-            // Body is authored in the admin's rich-text field, which emits a
-            // small, fixed set of formatting tags.
-            ? <div className="article-body" dangerouslySetInnerHTML={{ __html: a.body }} />
-            : <p className="article-body">{a.excerpt}</p>}
-        </div>
+        {/* Body is authored in the admin's rich-text field, which emits a
+            small, fixed set of formatting tags. */}
+        <div className="article-body"
+          dangerouslySetInnerHTML={{ __html: a.body || `<p>${a.excerpt || ''}</p>` }} />
       </article>
 
       {others.length > 0 && (
         <section className="latest">
           <div className="wrap">
-            <div className="sec-head"><h2>More from The Review</h2></div>
+            <div className="sec-head"><h2>{site.sections?.moreFromHeading}</h2></div>
             <div className="news-list">
               {others.map(o => (
                 <article className="item" key={o.id}>

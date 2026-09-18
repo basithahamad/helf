@@ -1,11 +1,15 @@
 import './globals.css';
+import { readSite } from '../lib/store';
 
-export const metadata = {
-  title: 'The H.E.L.F Review — News & Analysis on HBCU Leadership',
-  description:
-    'Published by the Higher Education Leadership Foundation. News, analysis and ' +
-    'commentary on the trends, challenges and leaders shaping HBCUs and higher education.'
-};
+// Title and description come from the site document, so SEO copy is editable in
+// the admin like everything else.
+export async function generateMetadata() {
+  const site = await readSite().catch(() => ({}));
+  return {
+    title: site.seo?.title || '',
+    description: site.seo?.description || ''
+  };
+}
 
 export const viewport = { width: 'device-width', initialScale: 1 };
 
