@@ -118,8 +118,8 @@
      The page header sat directly under the dark top bar with no room to
      breathe, and long forms scrolled the sign-out link off the screen. */
   .topbar{position:sticky;top:0;z-index:60;box-shadow:0 1px 0 rgba(0,0,0,.12)}
-  main{padding-top:3rem}
-  .head{margin-bottom:1.8rem;align-items:flex-start}
+  main{padding-top:4rem}
+  .head{margin-bottom:2.2rem;align-items:flex-start}
   .head h1{line-height:1.15;margin:0}
   .tabs{margin-bottom:1.7rem}
   form .grid{gap:1.35rem;padding:2rem}
@@ -139,7 +139,7 @@
   }
 
   @media(max-width:720px){
-    main{padding-top:2rem}
+    main{padding-top:2.4rem}
     .head{flex-direction:column;align-items:stretch}
     .head .btn{width:100%;justify-content:center}
     form .grid{padding:1.3rem}

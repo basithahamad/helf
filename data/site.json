@@ -42,7 +42,6 @@
     "allCommentaryLabel": "All Commentary →",
     "allCommentarySlug": "commentary",
     "eventsHeading": "Upcoming Events",
-    "mostReadHeading": "Most Read",
     "moreFromHeading": "More from The Review",
     "allStoriesHeading": "All Stories",
     "subscribeHeading": "Get The H.E.L.F Review in your inbox",
@@ -78,18 +77,6 @@
       "name": "Dr. Herman J. Felton Jr.",
       "title": "President & CEO, Wiley University · from “Lightning in a Bottle”",
       "image": "/assets/img/helf-a1.jpg"
-    },
-    {
-      "quote": "Placeholder pull quote — commentary cards highlight the voices and perspectives of the H.E.L.F. community of leaders.",
-      "name": "Author Name",
-      "title": "Title, Institution",
-      "image": "/assets/img/helf-a2.jpg"
-    },
-    {
-      "quote": "Placeholder pull quote — each card links to the full opinion article with the author's biography and photo.",
-      "name": "Author Name",
-      "title": "Title, Institution",
-      "image": "/assets/img/helf-a3.jpg"
     }
   ],
   "footer": {

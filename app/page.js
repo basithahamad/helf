@@ -89,16 +89,6 @@ export default async function Home() {
               </div>
 
               <div className="widget">
-                <h3>{sections.mostReadHeading}</h3>
-                {articles.slice(0, 4).map((a, i) => (
-                  <div className="mini" key={a.id}>
-                    <span className="n">{i + 1}</span>
-                    <a href={href(a)}>{a.title}</a>
-                  </div>
-                ))}
-              </div>
-
-              <div className="widget">
                 <h3>{sections.eventsHeading}</h3>
                 {(site.events || []).map((e, i) => (
                   <div className="event" key={i}>
