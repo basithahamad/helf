@@ -251,3 +251,18 @@
   .article-body{font-size:1.02rem}
   .article-body p:first-of-type::first-letter{font-size:3.6rem}
 }
+
+/* ── Accessibility ────────────────────────────────────────────────────────
+   Keyboard users had no visible focus indicator anywhere on the site. */
+a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visible{
+  outline:3px solid var(--gold);outline-offset:3px;border-radius:4px}
+.story a:focus-visible,.item a:focus-visible{outline-offset:6px}
+
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.01ms !important;animation-duration:.01ms !important;scroll-behavior:auto !important}
+  .item:hover .thumb img,.story:hover{transform:none}
+}
+
+/* Long headlines and pasted URLs should wrap rather than push the layout. */
+h1,h2,h3,.item h3,.story h2{overflow-wrap:break-word}
+.article-body a{overflow-wrap:anywhere}

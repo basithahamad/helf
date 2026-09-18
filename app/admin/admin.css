@@ -112,3 +112,35 @@
   .site-foot{position:sticky;bottom:0;display:flex;align-items:center;justify-content:flex-end;gap:1rem;padding:1rem 1.5rem;background:rgba(253,252,249,.96);backdrop-filter:blur(8px);border:1px solid var(--hairline);border-radius:var(--r);box-shadow:var(--shadow)}
   .dirty-note{font-size:.8rem;color:var(--crimson);font-weight:700}
   @media(max-width:720px){.site-body{grid-template-columns:1fr}}
+
+  /* ── Layout breathing room & focus states ─────────────────────────────
+     The page header sat directly under the dark top bar with no room to
+     breathe, and long forms scrolled the sign-out link off the screen. */
+  .topbar{position:sticky;top:0;z-index:60;box-shadow:0 1px 0 rgba(0,0,0,.12)}
+  main{padding-top:3rem}
+  .head{margin-bottom:1.8rem;align-items:flex-start}
+  .head h1{line-height:1.15;margin:0}
+  .tabs{margin-bottom:1.7rem}
+  form .grid{gap:1.35rem;padding:2rem}
+  .form-foot{padding:1.4rem 2rem;gap:1rem;align-items:center;flex-wrap:wrap}
+  .site-foot{position:sticky;bottom:0}
+
+  /* Keyboard users could not see where they were. */
+  a:focus-visible,button:focus-visible,input:focus-visible,
+  textarea:focus-visible,select:focus-visible,[contenteditable]:focus-visible{
+    outline:3px solid var(--gold);outline-offset:2px;border-radius:6px}
+
+  /* Disabled controls should look disabled. */
+  button:disabled{opacity:.42;cursor:not-allowed}
+
+  @media(prefers-reduced-motion:reduce){
+    *,*::before,*::after{transition-duration:.01ms !important;animation-duration:.01ms !important}
+  }
+
+  @media(max-width:720px){
+    main{padding-top:2rem}
+    .head{flex-direction:column;align-items:stretch}
+    .head .btn{width:100%;justify-content:center}
+    form .grid{padding:1.3rem}
+    .form-foot{padding:1.1rem 1.3rem}
+  }
