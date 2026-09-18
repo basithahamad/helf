@@ -6,9 +6,10 @@ export default function robots() {
       {
         userAgent: '*',
         allow: '/',
-        // The editor and the API are not content; search results for either
-        // would be noise at best.
-        disallow: ['/admin', '/api/', '/media/']
+        // The editor and the API are not content. Uploaded images are: they
+        // are the photos on the stories and the preview image when a story is
+        // shared, so blocking them would stop previews rendering.
+        disallow: ['/admin', '/api/']
       }
     ],
     sitemap: `${SITE_URL}/sitemap.xml`,
