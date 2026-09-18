@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import './admin.css';
 import { SITE_SCHEMA, LISTS } from './siteSchema';
+import { RichText } from './RichText';
 
 const CODE_KEY = 'helf_admin_code';
 const MAX_EDGE = 1600;
@@ -393,9 +394,8 @@ function ArticleEditor({ article, categories, onSave, onCancel, onDelete, onUplo
   const fileRef = useRef(null);
   const bodyRef = useRef(null);
 
-  // contenteditable is left uncontrolled — React must not re-render it while the
-  // caret is in it. Seed once, read innerHTML on save.
-  useEffect(() => { if (bodyRef.current) bodyRef.current.innerHTML = a.body || ''; }, [a.body]);
+  // RichText owns the contenteditable and seeds it once; this component only
+  // reads bodyRef.current.innerHTML when saving.
 
   async function pick(input) {
     const file = input.files[0];
@@ -409,8 +409,6 @@ function ArticleEditor({ article, categories, onSave, onCancel, onDelete, onUplo
       setImgMsg(err.message || 'Upload failed');
     }
   }
-
-  const fmt = cmd => { document.execCommand(cmd, false, null); bodyRef.current?.focus(); };
 
   function submit(e) {
     e.preventDefault();
@@ -475,13 +473,9 @@ function ArticleEditor({ article, categories, onSave, onCancel, onDelete, onUplo
 
             <div className="full">
               <label>Article body</label>
-              <div className="rte-bar">
-                <button type="button" onClick={() => fmt('bold')}><b>B</b></button>
-                <button type="button" onClick={() => fmt('italic')}><i>I</i></button>
-                <button type="button" onClick={() => fmt('insertUnorderedList')}>• List</button>
-                <button type="button" onClick={() => fmt('formatBlock', 'h2')}>H2</button>
-              </div>
-              <div className="rte" ref={bodyRef} contentEditable suppressContentEditableWarning />
+              {/* key: remount when a different article is opened, so the editor
+                  re-seeds instead of keeping the previous story's body. */}
+              <RichText key={a.id || 'new'} editorRef={bodyRef} initialHtml={a.body || ''} withPullQuote />
             </div>
           </div>
 
