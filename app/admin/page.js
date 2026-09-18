@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import './admin.css';
-import { SITE_SCHEMA, COMMENTARY, CATEGORIES } from './siteSchema';
+import { SITE_SCHEMA, LISTS, CATEGORIES } from './siteSchema';
 
 const CODE_KEY = 'helf_admin_code';
 const MAX_EDGE = 1600;
@@ -40,6 +40,7 @@ export default function Admin() {
   const [code, setCode] = useState(null);
   const [articles, setArticles] = useState([]);
   const [site, setSite] = useState(null);
+  const [subs, setSubs] = useState(null);
   const [tab, setTab] = useState('articles');
   const [editing, setEditing] = useState(null);   // article object | {} for new | null
   const [dirty, setDirty] = useState(false);
@@ -77,6 +78,14 @@ export default function Admin() {
     fetch('/api/site').then(r => r.json()).then(setSite).catch(() => setSite({}));
   }, [code, tab, site]);
 
+  useEffect(() => {
+    if (!code || tab !== 'subscribers' || subs) return;
+    fetch('/api/subscribe', { headers: headers() })
+      .then(r => (r.ok ? r.json() : []))
+      .then(setSubs)
+      .catch(() => setSubs([]));
+  }, [code, tab, subs, headers]);
+
   if (!code) return <Gate onIn={setCode} />;
 
   async function saveArticle(body, id) {
@@ -101,7 +110,12 @@ export default function Admin() {
     else flash('Save failed — try signing in again');
   }
 
-  const isSite = tab === 'site';
+  const TITLES = { articles: 'Articles', site: 'Site Content', subscribers: 'Subscribers' };
+  const NOTES = {
+    articles: 'Changes appear on the site immediately. Drafts are only visible here.',
+    site: 'Edit the wording on the public page. Layout, colours and fonts are fixed by the design and are not editable here.',
+    subscribers: 'Everyone who has signed up through the newsletter form on the public site.'
+  };
 
   return (
     <>
@@ -128,24 +142,24 @@ export default function Admin() {
         ) : (
           <div className="list-view">
             <div className="head">
-              <h1>{isSite ? 'Site Content' : 'Articles'}</h1>
-              {!isSite && <button className="btn btn-crimson" onClick={() => setEditing({})}>＋ New Article</button>}
+              <h1>{TITLES[tab]}</h1>
+              {tab === 'articles' &&
+                <button className="btn btn-crimson" onClick={() => setEditing({})}>＋ New Article</button>}
             </div>
 
             <div className="tabs">
-              <button className={tab === 'articles' ? 'on' : ''} onClick={() => setTab('articles')}>Articles</button>
-              <button className={tab === 'site' ? 'on' : ''} onClick={() => setTab('site')}>Site Content</button>
+              {Object.entries(TITLES).map(([key, label]) => (
+                <button key={key} className={tab === key ? 'on' : ''} onClick={() => setTab(key)}>{label}</button>
+              ))}
             </div>
 
-            <div className="note">
-              {isSite
-                ? 'Edit the wording on the public page. Layout, colours and fonts are fixed by the design and are not editable here.'
-                : 'Changes appear on the site immediately. Drafts are only visible here.'}
-            </div>
+            <div className="note">{NOTES[tab]}</div>
 
-            {isSite
+            {tab === 'site'
               ? <SiteForm site={site} setSite={setSite} dirty={dirty} setDirty={setDirty} onSave={saveSite} onUpload={upload} />
-              : <ArticleTable articles={articles} onEdit={setEditing} />}
+              : tab === 'subscribers'
+                ? <SubscriberTable subs={subs} />
+                : <ArticleTable articles={articles} onEdit={setEditing} />}
           </div>
         )}
       </main>
@@ -220,6 +234,45 @@ function ArticleTable({ articles, onEdit }) {
           {!articles.length && (
             <tr><td colSpan={6} style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
               No articles yet — click “New Article”.
+            </td></tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function SubscriberTable({ subs }) {
+  if (!subs) return <div className="card" style={{ padding: '2rem' }}>Loading…</div>;
+
+  const copyAll = () => navigator.clipboard?.writeText(subs.map(s => s.email).join(', '));
+  const fmt = iso => (iso ? new Date(iso).toLocaleDateString('en-US',
+    { year: 'numeric', month: 'short', day: 'numeric' }) : '');
+
+  return (
+    <div className="card">
+      <table>
+        <thead>
+          <tr>
+            <th>Email</th><th className="t-hide">Name</th><th>Signed up</th>
+            <th style={{ textAlign: 'right' }}>
+              {subs.length > 0 &&
+                <button className="btn btn-ghost btn-sm" onClick={copyAll}>Copy all emails</button>}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {subs.map(s => (
+            <tr key={s.id}>
+              <td className="t-title">{s.email}</td>
+              <td className="t-hide">{s.name || '—'}</td>
+              <td>{fmt(s.createdAt)}</td>
+              <td />
+            </tr>
+          ))}
+          {!subs.length && (
+            <tr><td colSpan={4} style={{ textAlign: 'center', color: '#999', padding: '2rem' }}>
+              No sign-ups yet.
             </td></tr>
           )}
         </tbody>
@@ -391,18 +444,18 @@ function SiteForm({ site, setSite, dirty, setDirty, onSave, onUpload }) {
 
   const touch = fn => { setSite(prev => { const next = structuredClone(prev); fn(next); return next; }); setDirty(true); };
   const setField = (sec, k, v) => touch(n => { (n[sec] = n[sec] || {})[k] = v; });
-  const setCell = (i, col, v) => touch(n => { n.commentary[i][col] = v; });
-  const move = (i, d) => touch(n => {
-    const arr = n.commentary, j = i + d;
+  const setCell = (listKey, i, col, v) => touch(n => { n[listKey][i][col] = v; });
+  const move = (listKey, i, d) => touch(n => {
+    const arr = n[listKey], j = i + d;
     if (j < 0 || j >= arr.length) return;
     [arr[i], arr[j]] = [arr[j], arr[i]];
   });
-  const remove = i => { if (confirm('Remove this card?')) touch(n => n.commentary.splice(i, 1)); };
-  const add = () => touch(n => {
-    (n.commentary = n.commentary || []).push(Object.fromEntries(COMMENTARY.cols.map(([k]) => [k, ''])));
+  const remove = (listKey, i) => {
+    if (confirm('Remove this entry?')) touch(n => n[listKey].splice(i, 1));
+  };
+  const add = list => touch(n => {
+    (n[list.key] = n[list.key] || []).push(Object.fromEntries(list.cols.map(([k]) => [k, ''])));
   });
-
-  const cards = Array.isArray(site.commentary) ? site.commentary : [];
 
   return (
     <>
@@ -430,38 +483,50 @@ function SiteForm({ site, setSite, dirty, setDirty, onSave, onUpload }) {
         );
       })}
 
-      <div className="site-sec">
-        <h2>{COMMENTARY.title}<small>{COMMENTARY.hint}</small></h2>
-        <div className="site-body">
-          <div className="sub-h">Cards <span style={{ color: 'var(--muted)', fontWeight: 600 }}>({cards.length})</span></div>
-          {cards.map((c, i) => (
-            <div className="lrow" key={i}>
-              <div className="lnum">{String(i + 1).padStart(2, '0')}</div>
-              <div className="lfields">
-                {COMMENTARY.cols.map(([ck, clabel, ctype]) => (
-                  <div key={ck}>
-                    {ctype === 'image'
-                      ? <ImageField label={clabel} value={c[ck]} onUpload={onUpload}
-                          onChange={v => setCell(i, ck, v)} />
-                      : <>
-                          <label>{clabel}</label>
-                          {ctype === 'textarea'
-                            ? <textarea style={{ minHeight: 70 }} value={c[ck] ?? ''} onChange={e => setCell(i, ck, e.target.value)} />
-                            : <input type="text" value={c[ck] ?? ''} onChange={e => setCell(i, ck, e.target.value)} />}
-                        </>}
+      {LISTS.map(list => {
+        const rows = Array.isArray(site[list.key]) ? site[list.key] : [];
+        return (
+          <div className="site-sec" key={list.key}>
+            <h2>{list.title}<small>{list.hint}</small></h2>
+            <div className="site-body">
+              <div className="sub-h">
+                Entries <span style={{ color: 'var(--muted)', fontWeight: 600 }}>({rows.length})</span>
+              </div>
+              {rows.map((row, i) => (
+                <div className="lrow" key={i}>
+                  <div className="lnum">{String(i + 1).padStart(2, '0')}</div>
+                  <div className="lfields">
+                    {list.cols.map(([ck, clabel, ctype]) => (
+                      <div key={ck}>
+                        {ctype === 'image'
+                          ? <ImageField label={clabel} value={row[ck]} onUpload={onUpload}
+                              onChange={v => setCell(list.key, i, ck, v)} />
+                          : <>
+                              <label>{clabel}</label>
+                              {ctype === 'textarea'
+                                ? <textarea style={{ minHeight: 70 }} value={row[ck] ?? ''}
+                                    onChange={e => setCell(list.key, i, ck, e.target.value)} />
+                                : <input type="text" value={row[ck] ?? ''}
+                                    onChange={e => setCell(list.key, i, ck, e.target.value)} />}
+                            </>}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
-              <div className="lacts">
-                <button type="button" className="mini" disabled={i === 0} onClick={() => move(i, -1)}>↑</button>
-                <button type="button" className="mini" disabled={i === cards.length - 1} onClick={() => move(i, 1)}>↓</button>
-                <button type="button" className="mini del" onClick={() => remove(i)}>✕</button>
-              </div>
+                  <div className="lacts">
+                    <button type="button" className="mini" disabled={i === 0}
+                      onClick={() => move(list.key, i, -1)}>↑</button>
+                    <button type="button" className="mini" disabled={i === rows.length - 1}
+                      onClick={() => move(list.key, i, 1)}>↓</button>
+                    <button type="button" className="mini del"
+                      onClick={() => remove(list.key, i)}>✕</button>
+                  </div>
+                </div>
+              ))}
+              <button type="button" className="add-row" onClick={() => add(list)}>＋ {list.addLabel}</button>
             </div>
-          ))}
-          <button type="button" className="add-row" onClick={add}>＋ Add Card</button>
-        </div>
-      </div>
+          </div>
+        );
+      })}
 
       <div className="site-foot">
         <span className="dirty-note">{dirty ? 'Unsaved changes' : ''}</span>

@@ -1,6 +1,14 @@
 import { readSite, publishedArticles } from '../lib/store';
+import { categoryHref } from '../lib/categories';
 import { Masthead, SiteFooter } from './Chrome';
 import { SubscribeForm } from './Forms';
+import { ArticleList } from './ArticleList';
+
+// Shown until the editor adds their own in the admin's Site Content tab.
+const DEFAULT_EVENTS = [
+  { day: '15', month: 'May', title: 'Ideation, Innovation & Collaboration Convening', meta: 'Virginia State University' },
+  { day: '—', month: 'TBA', title: 'H.E.L.F. Leadership Institute', meta: 'Dates to be announced' }
+];
 
 // Articles are edited through /admin and must appear immediately.
 export const dynamic = 'force-dynamic';
@@ -69,30 +77,9 @@ export default async function Home() {
             <div>
               <div className="sec-head">
                 <h2>{sections.latestHeading}</h2>
-                <a href="#">View All →</a>
+                <a href="/news">View All →</a>
               </div>
-              <div className="news-list">
-                {articles.map(a => (
-                  <article className="item" key={a.id}>
-                    <a className="thumb" href={href(a)}>
-                      {a.image && <img src={img(a.image)} alt="" />}
-                    </a>
-                    <div>
-                      <span className="kicker solid">{a.category || 'News'}</span>
-                      <h3><a href={href(a)}>{a.title}</a></h3>
-                      <p>{a.excerpt}</p>
-                      <span className="meta">
-                        By <b>{a.author || 'Staff'}</b>{a.date ? ` · ${a.date}` : ''}
-                      </span>
-                    </div>
-                  </article>
-                ))}
-                {!articles.length && (
-                  <p style={{ color: 'var(--muted)', padding: '2rem 0' }}>
-                    No articles published yet.
-                  </p>
-                )}
-              </div>
+              <ArticleList articles={articles} empty="No articles published yet." />
             </div>
 
             <aside>
@@ -118,21 +105,17 @@ export default async function Home() {
               </div>
 
               <div className="widget">
-                <h3>Upcoming Events</h3>
-                <div className="event">
-                  <div className="date-chip"><b>15</b><span>May</span></div>
-                  <div>
-                    <h4><a href="#">Ideation, Innovation &amp; Collaboration Convening</a></h4>
-                    <span className="meta">Virginia State University</span>
+                <h3>{sections.eventsHeading || 'Upcoming Events'}</h3>
+                {(site.events?.length ? site.events : DEFAULT_EVENTS).map((e, i) => (
+                  <div className="event" key={i}>
+                    <div className="date-chip"><b>{e.day}</b><span>{e.month}</span></div>
+                    <div>
+                      {/* An event only becomes a link once it has somewhere to go. */}
+                      <h4>{e.url ? <a href={e.url}>{e.title}</a> : e.title}</h4>
+                      <span className="meta">{e.meta}</span>
+                    </div>
                   </div>
-                </div>
-                <div className="event">
-                  <div className="date-chip"><b>—</b><span>TBA</span></div>
-                  <div>
-                    <h4><a href="#">H.E.L.F. Leadership Institute</a></h4>
-                    <span className="meta">Dates to be announced</span>
-                  </div>
-                </div>
+                ))}
               </div>
 
               <div className="widget about-widget" id="about-helf">
@@ -167,7 +150,7 @@ export default async function Home() {
         <div className="wrap">
           <div className="sec-head">
             <h2>{sections.commentaryHeading}</h2>
-            <a href="#">All Commentary →</a>
+            <a href={categoryHref('Commentary')}>All Commentary →</a>
           </div>
           <div className="comm-grid">
             {(site.commentary || []).map((c, i) => (

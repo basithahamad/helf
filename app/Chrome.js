@@ -1,8 +1,10 @@
 import { SearchForm } from './Forms';
+import { CATEGORIES, categoryHref } from '../lib/categories';
 
 // Masthead, category nav and footer — shared by the home page and article pages.
+// `active` is the category name to highlight in the nav, if any.
 
-export function Masthead({ site }) {
+export function Masthead({ site, active }) {
   const brand = site.brand || {};
   const about = site.about || {};
   return (
@@ -40,10 +42,11 @@ export function Masthead({ site }) {
       <nav className="catnav">
         <div className="wrap">
           <ul className="tabs">
-            {['Home', 'Featured Stories', 'Latest News', 'Leadership', 'HBCU Spotlight',
-              'Events', 'Announcements', 'Commentary', 'Research & Policy', 'Alumni Voices'
-            ].map((c, i) => (
-              <li key={c}><a className={i === 0 ? 'active' : ''} href={i === 0 ? '/' : '#'}>{c}</a></li>
+            <li><a className={active ? '' : 'active'} href="/">Home</a></li>
+            {CATEGORIES.map(c => (
+              <li key={c}>
+                <a className={active === c ? 'active' : ''} href={categoryHref(c)}>{c}</a>
+              </li>
             ))}
           </ul>
         </div>
@@ -76,7 +79,8 @@ export function SiteFooter({ site }) {
             <h4>Sections</h4>
             <ul>
               {['Featured Stories', 'Latest News', 'Events', 'Announcements', 'Commentary']
-                .map(s => <li key={s}><a href="#">{s}</a></li>)}
+                .map(s => <li key={s}><a href={categoryHref(s)}>{s}</a></li>)}
+              <li><a href="/news">All Stories</a></li>
             </ul>
           </div>
           <div>
@@ -94,7 +98,7 @@ export function SiteFooter({ site }) {
         </div>
         <div className="foot-bottom">
           <span>{footer.copyright}</span>
-          <span><a href="#">Privacy Policy</a> &nbsp;·&nbsp; <a href="#">Terms of Use</a></span>
+          <span><a href="/privacy">Privacy Policy</a> &nbsp;·&nbsp; <a href="/terms">Terms of Use</a></span>
         </div>
       </div>
     </footer>

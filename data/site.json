@@ -24,8 +24,25 @@
   "sections": {
     "latestHeading": "Latest News",
     "commentaryHeading": "Commentary & Voices",
+    "eventsHeading": "Upcoming Events",
     "subscribeHeading": "Get The H.E.L.F Review in your inbox"
   },
+  "events": [
+    {
+      "day": "15",
+      "month": "May",
+      "title": "Ideation, Innovation & Collaboration Convening",
+      "meta": "Virginia State University",
+      "url": ""
+    },
+    {
+      "day": "—",
+      "month": "TBA",
+      "title": "H.E.L.F. Leadership Institute",
+      "meta": "Dates to be announced",
+      "url": ""
+    }
+  ],
   "commentary": [
     {
       "quote": "We just knew that there was something — there was a void. And we couldn't codify it. We initially thought we needed a gathering space for like-minded individuals who want to serve at HBCUs.",
