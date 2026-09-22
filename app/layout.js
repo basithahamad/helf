@@ -12,7 +12,9 @@ export async function generateMetadata() {
   const seo = site.seo || {};
   const title = seo.title || '';
   const description = seo.description || '';
-  const image = seo.ogImage || '/assets/img/helf-lead.jpg';
+  // Left unset, app/opengraph-image.js renders the branded card. Setting a
+  // Sharing image in the admin overrides it with a real photograph.
+  const image = seo.ogImage || null;
 
   return {
     metadataBase: new URL(SITE_URL),
@@ -27,13 +29,13 @@ export async function generateMetadata() {
       description,
       url: '/',
       locale: 'en_US',
-      images: [{ url: image, width: 1400, height: 933, alt: title }]
+      ...(image ? { images: [{ url: image, alt: title }] } : {})
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [image]
+      ...(image ? { images: [image] } : {})
     },
     robots: {
       index: true,
