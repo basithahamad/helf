@@ -11,6 +11,10 @@ export const dynamic = 'force-dynamic';
 const href = a => a.url || `/article/${encodeURIComponent(a.id)}`;
 const img = s => (s?.startsWith('/') || s?.startsWith('data:') ? s : `/${s}`);
 
+// Copy written in the admin with blank lines between paragraphs should read as
+// paragraphs on the page rather than one unbroken block.
+const paragraphs = text => (text || '').split(/\n\s*\n/).map(t => t.trim()).filter(Boolean);
+
 export default async function Home() {
   const [site, articles] = await Promise.all([readSite(), publishedArticles()]);
 
@@ -114,7 +118,11 @@ export default async function Home() {
                 </div>
                 <b>{editor.name}</b>
                 <span className="role">{editor.role}</span>
-                <p>{editor.bio}</p>
+                {/* Blank lines in the admin become real paragraphs; as one <p>
+                    a longer welcome ran together into a single block. */}
+                {paragraphs(editor.bio).map((para, i) => (
+                  <p key={i} dangerouslySetInnerHTML={{ __html: para }} />
+                ))}
                 <a className="more" href={editor.fullBioUrl || '#'}>{editor.fullBioLabel}</a>
               </div>
 
@@ -134,7 +142,9 @@ export default async function Home() {
 
               <div className="widget about-widget" id="about-helf">
                 <h3>{about.heading}</h3>
-                <p>{about.text}</p>
+                {paragraphs(about.text).map((para, i) => (
+                  <p key={i} dangerouslySetInnerHTML={{ __html: para }} />
+                ))}
                 <a className="btn btn-gold" style={{ marginTop: '1.2rem' }}
                   href={about.parentLinkUrl} target="_blank" rel="noopener">
                   {about.parentLinkLabel}
@@ -147,7 +157,15 @@ export default async function Home() {
 
       <section className="subscribe" id="subscribe">
         <div className="wrap">
-          <div className="inner">
+          {/* The band's photograph is a setting, not a stylesheet constant. */}
+          <div
+            className="inner"
+            style={{
+              backgroundImage:
+                'linear-gradient(100deg,rgba(42,6,13,.93) 38%,rgba(86,13,24,.8) 68%,rgba(125,19,34,.6))' +
+                (sections.subscribeImage ? `, url('${sections.subscribeImage}')` : '')
+            }}
+          >
             <div>
               <h2>{sections.subscribeHeading}</h2>
               <p>{sections.subscribeBlurb}</p>

@@ -152,9 +152,10 @@
 
   /* ── Subscribe ─────────────────────────── */
   .subscribe{margin:1.4rem 0 0;position:relative}
-  .subscribe .inner{position:relative;border-radius:calc(var(--r) + 8px);overflow:hidden;padding:4rem 3.4rem;color:#fff;background:
-     linear-gradient(100deg,rgba(42,6,13,.93) 38%,rgba(86,13,24,.8) 68%,rgba(125,19,34,.6)),
-     url('/assets/img/helf-feature.jpg') center 28%/cover no-repeat;box-shadow:var(--shadow-lg)}
+  /* The photograph is set inline from the site document so it can be changed in
+     the admin; the gradient that keeps the text legible stays with the design. */
+  .subscribe .inner{position:relative;border-radius:calc(var(--r) + 8px);overflow:hidden;padding:4rem 3.4rem;color:#fff;
+     background-color:var(--crimson-ink);background-position:center 28%;background-size:cover;background-repeat:no-repeat;box-shadow:var(--shadow-lg)}
   .subscribe .inner{display:grid;grid-template-columns:1.1fr .9fr;gap:2.8rem;align-items:center}
   .subscribe h2{font-family:'DM Serif Display',serif;font-weight:400;font-size:2.3rem;line-height:1.15;margin-bottom:.6rem}
   .subscribe h2 i{color:var(--gold-bright)}
@@ -267,3 +268,5 @@ a:focus-visible,button:focus-visible,input:focus-visible,[tabindex]:focus-visibl
 /* Long headlines and pasted URLs should wrap rather than push the layout. */
 h1,h2,h3,.item h3,.story h2{overflow-wrap:break-word}
 .article-body a{overflow-wrap:anywhere}
+.widget p + p{margin-top:.75rem}
+.editor-w p{text-align:left}

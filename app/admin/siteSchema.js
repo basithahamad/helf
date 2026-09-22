@@ -36,7 +36,7 @@ export const SITE_SCHEMA = [
     { k: 'name', label: 'Editor name' },
     { k: 'role', label: 'Role' },
     { k: 'image', label: 'Headshot', type: 'image', full: true },
-    { k: 'bio', label: 'Short bio', type: 'textarea', full: true },
+    { k: 'bio', label: 'Welcome text — leave a blank line between paragraphs', type: 'textarea', full: true },
     { k: 'fullBioLabel', label: 'Full-bio link label' },
     { k: 'fullBioUrl', label: 'Full-bio link URL' }] },
 
@@ -54,6 +54,7 @@ export const SITE_SCHEMA = [
     { k: 'searchHeading', label: 'Search page heading' },
     { k: 'subscribeHeading', label: 'Newsletter heading', full: true },
     { k: 'subscribeBlurb', label: 'Newsletter blurb', type: 'textarea', full: true },
+    { k: 'subscribeImage', label: 'Newsletter band photograph', type: 'image', full: true },
     { k: 'emptyMessage', label: 'Shown when there are no articles', full: true },
     { k: 'emptyCategoryMessage', label: 'Empty category — {category} is replaced by its name', full: true },
     { k: 'searchPromptMessage', label: 'Shown on the search page before searching', full: true },

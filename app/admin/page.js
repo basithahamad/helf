@@ -397,7 +397,7 @@ function ArticleEditor({ article, categories, onSave, onCancel, onDelete, onUplo
     title: a.title || '', category: a.category || categories[0]?.name || '', author: a.author || '',
     date: a.date || new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
     excerpt: a.excerpt || '', status: a.status === 'draft' ? 'draft' : 'published',
-    featured: !!a.featured, image: a.image || ''
+    featured: !!a.featured, image: a.image || '', caption: a.caption || ''
   });
   const set = (k, v) => setF(p => ({ ...p, [k]: v }));
   const [imgMsg, setImgMsg] = useState('');
@@ -479,6 +479,13 @@ function ArticleEditor({ article, categories, onSave, onCancel, onDelete, onUplo
                 <span>{imgMsg || (f.image ? 'Click to replace photo' : 'Click to upload a photo (JPG/PNG)')}</span>
               </div>
               <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => pick(e.target)} />
+            </div>
+
+            <div className="full">
+              <label>Photo caption</label>
+              <textarea value={f.caption} style={{ minHeight: 60 }}
+                placeholder="Who or what is in the photo, and where it was taken. Shown under the image on the article page — leave blank for no caption."
+                onChange={e => set('caption', e.target.value)} />
             </div>
 
             <div className="full">

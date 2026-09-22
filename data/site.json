@@ -55,7 +55,8 @@
     "emptyCategoryMessage": "No stories in {category} yet — they'll appear here as they're published.",
     "searchHeading": "Search",
     "searchPromptMessage": "Type a word or phrase in the search box above to find stories.",
-    "searchEmptyMessage": "Nothing matched “{query}”. Try a different word."
+    "searchEmptyMessage": "Nothing matched “{query}”. Try a different word.",
+    "subscribeImage": "/assets/img/helf-feature.jpg"
   },
   "events": [
     {
