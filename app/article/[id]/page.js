@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
-import { readSite, getArticle, publishedArticles } from '../../../lib/store';
+import { headers } from 'next/headers';
+import { readSite, getArticle, publishedArticles, recordView } from '../../../lib/store';
 import { Masthead, SiteFooter } from '../../Chrome';
 
 export const dynamic = 'force-dynamic';
@@ -45,6 +46,13 @@ export default async function Article({ params }) {
 
   // Unknown id, or a draft — getArticle only returns published stories here.
   if (!a) notFound();
+
+  // Count the read. Crawlers and preview bots would otherwise dominate the
+  // Most Read panel on a site this size.
+  const agent = (await headers()).get('user-agent') || '';
+  if (!/bot|crawl|spider|preview|facebookexternalhit|slackbot|bingpreview/i.test(agent)) {
+    await recordView(a.id);
+  }
 
   const others = articles.filter(x => x.id !== a.id).slice(0, 3);
 

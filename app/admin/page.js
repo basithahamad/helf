@@ -351,6 +351,24 @@ function CategoryEditor({ cats, onSave }) {
   );
 }
 
+
+// Download the list as CSV. Whichever service the newsletter goes out through
+// — Mailchimp, Brevo, Constant Contact — imports a file like this.
+const CRLF = String.fromCharCode(13, 10);   // what spreadsheets expect in a CSV
+
+function downloadCsv(subs) {
+  const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
+  const rows = [['Email', 'Name', 'Signed up'],
+    ...subs.map(s => [s.email, s.name || '', (s.createdAt || '').slice(0, 10)])];
+  const blob = new Blob([rows.map(r => r.map(esc).join(',')).join(CRLF)],
+    { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `subscribers-${(new Date()).toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
 function SubscriberTable({ subs }) {
   if (!subs) return <div className="card" style={{ padding: '2rem' }}>Loading…</div>;
 
@@ -365,8 +383,12 @@ function SubscriberTable({ subs }) {
           <tr>
             <th>Email</th><th className="t-hide">Name</th><th>Signed up</th>
             <th style={{ textAlign: 'right' }}>
-              {subs.length > 0 &&
-                <button className="btn btn-ghost btn-sm" onClick={copyAll}>Copy all emails</button>}
+              {subs.length > 0 && (
+                <span style={{ display: 'inline-flex', gap: '.4rem' }}>
+                  <button className="btn btn-ghost btn-sm" onClick={copyAll}>Copy all emails</button>
+                  <button className="btn btn-ghost btn-sm" onClick={() => downloadCsv(subs)}>Download CSV</button>
+                </span>
+              )}
             </th>
           </tr>
         </thead>

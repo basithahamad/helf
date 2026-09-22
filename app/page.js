@@ -1,4 +1,4 @@
-import { readSite, publishedArticles } from '../lib/store';
+import { readSite, publishedArticles, mostReadArticles } from '../lib/store';
 import { categoryHref } from '../lib/categories';
 import { Masthead, SiteFooter } from './Chrome';
 import { SubscribeForm } from './Forms';
@@ -16,7 +16,9 @@ const img = s => (s?.startsWith('/') || s?.startsWith('data:') ? s : `/${s}`);
 const paragraphs = text => (text || '').split(/\n\s*\n/).map(t => t.trim()).filter(Boolean);
 
 export default async function Home() {
-  const [site, articles] = await Promise.all([readSite(), publishedArticles()]);
+  const [site, articles, mostRead] = await Promise.all([
+    readSite(), publishedArticles(), mostReadArticles(4)
+  ]);
 
   const editor = site.editor || {};
   const about = site.about || {};
@@ -125,6 +127,18 @@ export default async function Home() {
                 ))}
                 <a className="more" href={editor.fullBioUrl || '#'}>{editor.fullBioLabel}</a>
               </div>
+
+              {mostRead.length > 0 && (
+                <div className="widget">
+                  <h3>{sections.mostReadHeading}</h3>
+                  {mostRead.map((a, i) => (
+                    <div className="mini" key={a.id}>
+                      <span className="n">{i + 1}</span>
+                      <a href={href(a)}>{a.title}</a>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               <div className="widget">
                 <h3>{sections.eventsHeading}</h3>

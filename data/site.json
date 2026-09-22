@@ -56,7 +56,8 @@
     "searchHeading": "Search",
     "searchPromptMessage": "Type a word or phrase in the search box above to find stories.",
     "searchEmptyMessage": "Nothing matched “{query}”. Try a different word.",
-    "subscribeImage": "/assets/img/helf-feature.jpg"
+    "subscribeImage": "/assets/img/helf-feature.jpg",
+    "mostReadHeading": "Most Read"
   },
   "events": [
     {

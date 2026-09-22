@@ -45,6 +45,7 @@ export const SITE_SCHEMA = [
     { k: 'featuredReadMore', label: 'Featured ticker link text' },
     { k: 'latestHeading', label: 'Latest news heading' },
     { k: 'viewAllLabel', label: 'Latest news “view all” link' },
+    { k: 'mostReadHeading', label: 'Most-read panel heading' },
     { k: 'eventsHeading', label: 'Events panel heading' },
     { k: 'commentaryHeading', label: 'Commentary heading' },
     { k: 'allCommentaryLabel', label: 'Commentary “view all” link' },
