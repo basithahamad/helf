@@ -78,8 +78,8 @@ export const SITE_SCHEMA = [
   { key: 'legal', title: 'Privacy & Terms', hint: 'The two pages linked at the foot of every page', fields: [
     { k: 'privacyHeading', label: 'Privacy page heading' },
     { k: 'termsHeading', label: 'Terms page heading' },
-    { k: 'privacy', label: 'Privacy policy — blank lines separate paragraphs', type: 'textarea', full: true },
-    { k: 'terms', label: 'Terms of use — blank lines separate paragraphs', type: 'textarea', full: true }] }
+    { k: 'privacy', label: 'Privacy policy — blank lines separate paragraphs', type: 'textarea', plain: true, full: true },
+    { k: 'terms', label: 'Terms of use — blank lines separate paragraphs', type: 'textarea', plain: true, full: true }] }
 ];
 
 // Repeatable blocks. Each is a list of rows edited with the same row editor.

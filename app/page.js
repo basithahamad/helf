@@ -182,7 +182,7 @@ export default async function Home() {
           >
             <div>
               <h2>{sections.subscribeHeading}</h2>
-              <p>{sections.subscribeBlurb}</p>
+              <p dangerouslySetInnerHTML={{ __html: sections.subscribeBlurb || '' }} />
             </div>
             <SubscribeForm />
           </div>
@@ -199,7 +199,7 @@ export default async function Home() {
           <div className="comm-grid">
             {(site.commentary || []).map((c, i) => (
               <article className="comm" key={i}>
-                <q>{c.quote}</q>
+                <q dangerouslySetInnerHTML={{ __html: c.quote || '' }} />
                 <div className="author">
                   <div className="avatar"><img src={img(c.image)} alt="" /></div>
                   <div><b>{c.name}</b><span>{c.title}</span></div>

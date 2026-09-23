@@ -37,6 +37,15 @@ function downscale(file) {
   });
 }
 
+
+// Long-form copy is edited as rich text: bold, italic, colour, size and links.
+// It is rendered inside an existing paragraph on the public page, so block
+// formatting is deliberately unavailable — see RichText's inline mode.
+function InlineRich({ value, onChange }) {
+  const ref = useRef(null);
+  return <RichText inline editorRef={ref} initialHtml={value ?? ''} onChange={onChange} />;
+}
+
 export default function Admin() {
   const [code, setCode] = useState(null);
   const [articles, setArticles] = useState([]);
@@ -608,7 +617,11 @@ function SiteForm({ site, setSite, dirty, setDirty, onSave, onUpload }) {
                     : <>
                         <label>{f.label}</label>
                         {f.type === 'textarea'
-                          ? <textarea value={d[f.k] ?? ''} onChange={e => setField(sec.key, f.k, e.target.value)} />
+                          ? (f.plain
+                              // Privacy and Terms are split into paragraphs on blank
+                              // lines, so they stay plain text.
+                              ? <textarea value={d[f.k] ?? ''} onChange={e => setField(sec.key, f.k, e.target.value)} />
+                              : <InlineRich value={d[f.k]} onChange={v => setField(sec.key, f.k, v)} />)
                           : <input type="text" value={d[f.k] ?? ''} onChange={e => setField(sec.key, f.k, e.target.value)} />}
                       </>}
                 </div>
@@ -639,8 +652,8 @@ function SiteForm({ site, setSite, dirty, setDirty, onSave, onUpload }) {
                           : <>
                               <label>{clabel}</label>
                               {ctype === 'textarea'
-                                ? <textarea style={{ minHeight: 70 }} value={row[ck] ?? ''}
-                                    onChange={e => setCell(list.key, i, ck, e.target.value)} />
+                                ? <InlineRich value={row[ck]}
+                                    onChange={v => setCell(list.key, i, ck, v)} />
                                 : <input type="text" value={row[ck] ?? ''}
                                     onChange={e => setCell(list.key, i, ck, e.target.value)} />}
                             </>}
