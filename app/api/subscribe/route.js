@@ -1,4 +1,5 @@
 import { addSubscriber, listSubscribers, authorised } from '../../../lib/store';
+import { syncSubscriber } from '../../../lib/newsletter';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,6 +25,11 @@ export async function POST(request) {
     console.error('subscribe failed', err);
     return Response.json({ error: 'Something went wrong — please try again.' }, { status: 500 });
   }
+
+  // Mirror it to the mailing service if one is configured. The address is
+  // already stored, so a failure here is logged rather than shown to the
+  // visitor — they did sign up.
+  await syncSubscriber({ email, name });
   // Same answer whether or not the address was already on the list.
   return Response.json({ ok: true }, { status: 201 });
 }
