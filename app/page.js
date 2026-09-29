@@ -1,4 +1,4 @@
-import { readSite, publishedArticles, mostReadArticles } from '../lib/store';
+import { readSite, publishedArticles, mostReadArticles, articlesByCategory, categoryBySlug } from '../lib/store';
 import { categoryHref } from '../lib/categories';
 import { Masthead, SiteFooter } from './Chrome';
 import { SubscribeForm } from './Forms';
@@ -23,6 +23,17 @@ export default async function Home() {
   const editor = site.editor || {};
   const about = site.about || {};
   const sections = site.sections || {};
+
+  // Commentary & Voices features the op-eds themselves: everything published in
+  // the category that section points at. Previously it showed only the
+  // hand-written pull-quote cards, so an op-ed could be published and never
+  // appear here.
+  const commentaryCategory = await categoryBySlug(sections.allCommentarySlug || 'commentary');
+  const opEds = commentaryCategory ? await articlesByCategory(commentaryCategory.name) : [];
+
+  // A card with no quote is a photo and a byline floating on their own.
+  const hasText = html => Boolean(String(html || '').replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').trim());
+  const quoteCards = (site.commentary || []).filter(c => hasText(c.quote));
 
   const featured = articles.find(a => a.featured) || articles[0];
   const rest = articles.filter(a => a !== featured);
@@ -189,6 +200,7 @@ export default async function Home() {
         </div>
       </section>
 
+      {(opEds.length > 0 || quoteCards.length > 0) && (
       <section className="commentary">
         <div className="wrap">
           <div className="sec-head">
@@ -197,11 +209,23 @@ export default async function Home() {
             <a href={categoryHref(sections.allCommentarySlug)}>{sections.allCommentaryLabel}</a>
           </div>
           <div className="comm-grid">
-            {(site.commentary || []).map((c, i) => (
-              <article className="comm" key={i}>
+            {opEds.map(a => (
+              <article className="comm" key={a.id}>
+                {/* Whole card is the link to the piece. */}
+                <a className="card-link" href={href(a)} aria-label={a.title} />
+                <q>{a.excerpt || a.title}</q>
+                <div className="author">
+                  <div className="avatar">{a.image && <img src={img(a.image)} alt="" />}</div>
+                  <div><b>{a.author || sections.staffByline}</b><span>{a.date || a.category}</span></div>
+                </div>
+              </article>
+            ))}
+
+            {quoteCards.map((c, i) => (
+              <article className="comm" key={`quote-${i}`}>
                 <q dangerouslySetInnerHTML={{ __html: c.quote || '' }} />
                 <div className="author">
-                  <div className="avatar"><img src={img(c.image)} alt="" /></div>
+                  <div className="avatar">{c.image && <img src={img(c.image)} alt="" />}</div>
                   <div><b>{c.name}</b><span>{c.title}</span></div>
                 </div>
               </article>
@@ -209,6 +233,7 @@ export default async function Home() {
           </div>
         </div>
       </section>
+      )}
 
       <SiteFooter site={site} />
     </>

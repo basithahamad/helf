@@ -270,3 +270,10 @@ h1,h2,h3,.item h3,.story h2{overflow-wrap:break-word}
 .article-body a{overflow-wrap:anywhere}
 .widget p + p{margin-top:.75rem}
 .editor-w p{text-align:left}
+
+/* A commentary card that points at an op-ed is clickable across its whole
+   surface, rather than hiding the link inside the quotation. */
+.comm .card-link{position:absolute;inset:0;z-index:2;border-radius:var(--r)}
+.comm:has(.card-link){cursor:pointer}
+.comm:has(.card-link):hover q{color:var(--crimson)}
+.comm q{transition:color .2s}
