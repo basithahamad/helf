@@ -25,6 +25,47 @@ const COLOURS = [
   ['#1b5fa8', 'Blue']
 ];
 
+
+// Pasting from Word or Google Docs brings block elements, MsoNormal classes and
+// inline font styles with it. Inside an inline field that block markup is
+// invalid — these values render inside an existing <p> — and in an article it
+// overrides the site's own typography. Both are cleaned on the way in.
+const BLOCK_TAGS = new Set(['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'UL', 'OL', 'LI', 'BLOCKQUOTE']);
+const KEEP_TAGS = new Set([
+  'P', 'BR', 'B', 'STRONG', 'I', 'EM', 'U', 'S', 'A',
+  'H2', 'H3', 'UL', 'OL', 'LI', 'BLOCKQUOTE'
+]);
+
+function cleanPastedHtml(html, inline) {
+  const doc = new DOMParser().parseFromString(`<body>${html}</body>`, 'text/html');
+
+  const walk = node => {
+    for (const child of [...node.children]) {
+      walk(child);
+
+      const tag = child.tagName;
+      const isBlock = BLOCK_TAGS.has(tag);
+      const keep = KEEP_TAGS.has(tag) && !(inline && isBlock);
+
+      if (keep) {
+        // Word's fonts and colours must not outrank the site's own.
+        for (const attr of [...child.attributes]) {
+          if (!(tag === 'A' && attr.name === 'href')) child.removeAttribute(attr.name);
+        }
+        if (tag === 'A') { child.setAttribute('target', '_blank'); child.setAttribute('rel', 'noopener'); }
+      } else {
+        // Unwrap: keep the words, drop the element. A block becomes a line break
+        // so pasted paragraphs still read as separate lines in an inline field.
+        if (inline && isBlock) child.after(doc.createElement('br'));
+        child.replaceWith(...child.childNodes);
+      }
+    }
+  };
+  walk(doc.body);
+
+  return doc.body.innerHTML.replace(/(<br>\s*){3,}/g, '<br><br>').trim();
+}
+
 export function RichText({ editorRef, initialHtml = '', withPullQuote = false, inline = false, onChange }) {
   const saved = useRef(null);
   const seeded = useRef(false);
@@ -183,6 +224,33 @@ export function RichText({ editorRef, initialHtml = '', withPullQuote = false, i
         // Without this the field accepts typing but the form never learns of
         // it, so Save writes back the value that was already there.
         onInput={onChange ? e => onChange(e.currentTarget.innerHTML) : undefined}
+        onPaste={e => {
+          const html = e.clipboardData.getData('text/html');
+          const text = e.clipboardData.getData('text/plain');
+          if (!html && !text) return;
+
+          const asPlain = () => text
+            .replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))
+            .split(String.fromCharCode(13)).join('')
+            .split(String.fromCharCode(10)).join(inline ? '<br>' : '</p><p>');
+
+          let cleaned;
+          try {
+            cleaned = html ? cleanPastedHtml(html, inline) : asPlain();
+          } catch {
+            // Never swallow a paste: fall back to the plain text rather than
+            // losing what the writer copied.
+            cleaned = asPlain();
+          }
+          if (!cleaned) return;
+
+          e.preventDefault();
+          // Insert at the live caret. run() restores the remembered range,
+          // which can be staler than where the paste actually happened.
+          document.execCommand('insertHTML', false, cleaned);
+          remember();
+          onChange?.(e.currentTarget.innerHTML);
+        }}
         // In inline mode Enter would open a new block; a line break keeps the
         // value valid inside the paragraph it will be rendered in.
         onKeyDown={inline ? e => {
