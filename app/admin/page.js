@@ -205,16 +205,22 @@ function Gate({ onIn }) {
   // Until this flips, submitting would be handled by the browser rather than
   // by onSubmit, sending the code as a query string.
   const [ready, setReady] = useState(false);
-  useEffect(() => setReady(true), []);
+  const codeRef = useRef(null);
+  useEffect(() => {
+    setReady(true);
+    // Typing that beat hydration is in the DOM but not in state; adopt it.
+    if (codeRef.current?.value) setV(codeRef.current.value);
+  }, []);
   async function submit() {
+    const code = codeRef.current?.value || v;
     // No id and no body: a correct code gets 400, a wrong one 401. Nothing is written.
     const r = await fetch('/api/articles', {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'x-admin-code': v }
+      headers: { 'Content-Type': 'application/json', 'x-admin-code': code }
     });
     if (r.status === 401) { setErr('Incorrect code — try again.'); return; }
-    localStorage.setItem(CODE_KEY, v);
-    onIn(v);
+    localStorage.setItem(CODE_KEY, code);
+    onIn(code);
   }
   return (
     <div id="gate">
@@ -229,7 +235,7 @@ function Gate({ onIn }) {
           <input type="text" name="username" autoComplete="username"
             value="Content Editor" readOnly aria-hidden="true" tabIndex={-1}
             style={{ display: 'none' }} />
-          <input type="password" name="password" autoComplete="current-password"
+          <input ref={codeRef} type="password" name="password" autoComplete="current-password"
             value={v} placeholder="Access code" aria-label="Access code"
             onChange={e => setV(e.target.value)} />
           <button type="submit" className="btn btn-crimson" disabled={!ready}
