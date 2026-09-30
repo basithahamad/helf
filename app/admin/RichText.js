@@ -25,7 +25,7 @@ const COLOURS = [
   ['#1b5fa8', 'Blue']
 ];
 
-export function RichText({ editorRef, initialHtml = '', withPullQuote = false }) {
+export function RichText({ editorRef, initialHtml = '', withPullQuote = false, inline = false, onChange }) {
   const saved = useRef(null);
   const seeded = useRef(false);
   const [colourOpen, setColourOpen] = useState(false);
@@ -115,16 +115,22 @@ export function RichText({ editorRef, initialHtml = '', withPullQuote = false })
 
         <span className="rte-sep" />
 
-        <Btn onPress={() => block('p')} title="Normal paragraph" wide>¶ Text</Btn>
-        <Btn onPress={() => block('h2')} title="Section heading" wide>H2</Btn>
-        <Btn onPress={() => block('h3')} title="Sub-heading" wide>H3</Btn>
+        {/* Block formatting is hidden for fields rendered inside an existing
+            <p> on the public page, where a heading or list is invalid markup. */}
+        {!inline && (
+          <>
+            <Btn onPress={() => block('p')} title="Normal paragraph" wide>¶ Text</Btn>
+            <Btn onPress={() => block('h2')} title="Section heading" wide>H2</Btn>
+            <Btn onPress={() => block('h3')} title="Sub-heading" wide>H3</Btn>
 
-        <span className="rte-sep" />
+            <span className="rte-sep" />
 
-        <Btn onPress={() => run('insertUnorderedList')} title="Bulleted list" wide>• List</Btn>
-        <Btn onPress={() => run('insertOrderedList')} title="Numbered list" wide>1. List</Btn>
+            <Btn onPress={() => run('insertUnorderedList')} title="Bulleted list" wide>• List</Btn>
+            <Btn onPress={() => run('insertOrderedList')} title="Numbered list" wide>1. List</Btn>
 
-        <span className="rte-sep" />
+            <span className="rte-sep" />
+          </>
+        )}
 
         <Btn onPress={addLink} title="Add link" wide>🔗 Link</Btn>
         <Btn onPress={() => run('unlink')} title="Remove link" wide>Unlink</Btn>
@@ -167,13 +173,21 @@ export function RichText({ editorRef, initialHtml = '', withPullQuote = false })
       </div>
 
       <div
-        className="rte"
+        className={inline ? 'rte rte-inline' : 'rte'}
         ref={editorRef}
         contentEditable
         suppressContentEditableWarning
         onKeyUp={remember}
         onMouseUp={remember}
         onBlur={remember}
+        // Without this the field accepts typing but the form never learns of
+        // it, so Save writes back the value that was already there.
+        onInput={onChange ? e => onChange(e.currentTarget.innerHTML) : undefined}
+        // In inline mode Enter would open a new block; a line break keeps the
+        // value valid inside the paragraph it will be rendered in.
+        onKeyDown={inline ? e => {
+          if (e.key === 'Enter') { e.preventDefault(); run('insertHTML', '<br>'); }
+        } : undefined}
       />
     </>
   );
