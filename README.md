@@ -50,3 +50,32 @@ time, so files written there after a build are not served.
   `client_max_body_size 8m;`
 - `ADMIN_CODE` is the only thing protecting `/admin` and the upload endpoint.
   Set a real one and serve the site over HTTPS.
+
+## Verifying a deploy
+
+`next build` compiles the admin but never exercises it, and every regression
+this project has shipped — fields that accepted typing and discarded it, an
+Enter key bound to a command no browser implements, a paste that pulled Word's
+fonts into the article body — was invisible to the build and obvious in a
+browser.
+
+After every deploy:
+
+```bash
+npm run test:admin -- https://thehelfreview.com "$ADMIN_CODE"
+```
+
+It signs in, types into a field, saves, reloads, confirms the change reached
+both the database and the public page, exercises paste cleaning, then restores
+the original value exactly. It is safe to run against the live site with real
+content; the field it edits (the SEO description) has no visible trace on the
+page beyond a meta tag.
+
+One-off on a new machine:
+
+```bash
+npx playwright install chromium
+```
+
+If it fails, roll back rather than leaving it: `git revert`, then `sudo
+deploy-helf`.

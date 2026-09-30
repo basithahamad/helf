@@ -7,12 +7,16 @@
     "dev": "next dev -p 8742",
     "build": "next build",
     "start": "next start -p 8742",
-    "newsletter:sync": "node --env-file=.env scripts/sync-subscribers.mjs"
+    "newsletter:sync": "node --env-file=.env scripts/sync-subscribers.mjs",
+    "test:admin": "node scripts/admin-test.mjs"
   },
   "dependencies": {
     "mysql2": "^3.24.4",
     "next": "16.3.4",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
   }
 }
