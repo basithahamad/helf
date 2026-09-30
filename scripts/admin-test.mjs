@@ -32,7 +32,8 @@ const page = await browser.newPage();
 page.on('pageerror', e => { failures++; console.log('FAIL  page error:', e.message); });
 
 // ---- sign in -------------------------------------------------------------
-await page.goto(`${SITE}/admin`, { waitUntil: 'networkidle' });
+await page.goto(`${SITE}/admin`, { waitUntil: 'domcontentloaded' });
+await page.waitForSelector('input[type=password]', { timeout: 20000 });
 await page.fill('input[type=password]', CODE);
 await page.click('button[type=submit]');
 await page.waitForSelector('.tabs button', { timeout: 15000 });
@@ -64,7 +65,7 @@ await page.waitForSelector('.toast.show', { timeout: 15000 });
 check(true, `saved (toast: "${(await page.locator('.toast').innerText()).trim()}")`);
 
 // ---- reload and confirm it stuck -----------------------------------------
-await page.reload({ waitUntil: 'networkidle' });
+await page.reload({ waitUntil: 'domcontentloaded' });
 await page.click('.tabs button:has-text("Site Content")');
 await field.waitFor({ timeout: 15000 });
 const afterReload = await field.innerHTML();
@@ -100,7 +101,7 @@ await field.evaluate((el, html) => {
 await page.waitForTimeout(200);
 await saveBtn.click();
 await page.waitForSelector('.toast.show', { timeout: 15000 });
-await page.reload({ waitUntil: 'networkidle' });
+await page.reload({ waitUntil: 'domcontentloaded' });
 await page.click('.tabs button:has-text("Site Content")');
 await field.waitFor({ timeout: 15000 });
 const restored = await field.innerHTML();
